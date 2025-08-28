@@ -16,6 +16,7 @@ python-multipart
 
 # Traitement PDF et fichiers
 pdfminer.six
+PyPDF2
 python-docx
 textract==1.6.3
 
