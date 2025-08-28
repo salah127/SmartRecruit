@@ -157,3 +157,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20
 }
+
+# Configuration IA
+AI_MODELS_DIR = os.path.join(BASE_DIR, 'ai_models')
+os.makedirs(AI_MODELS_DIR, exist_ok=True)
+
+# Configuration Celery pour les tâches asynchrones
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

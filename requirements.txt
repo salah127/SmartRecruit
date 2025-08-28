@@ -1,6 +1,8 @@
 #Django & DRF
 django
 djangorestframework
+python-decouple
+
 
 # IA et NLP
 transformers
