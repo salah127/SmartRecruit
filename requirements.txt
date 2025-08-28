@@ -1,0 +1,27 @@
+#Django & DRF
+django
+djangorestframework
+
+# IA et NLP
+transformers
+torch
+spacy
+scikit-learn
+pandas
+numpy
+sentence-transformers
+python-multipart
+
+# Traitement PDF et fichiers
+pdfminer.six
+python-docx
+textract==1.6.3
+
+# Tâches asynchrones
+celery
+redis
+
+# Visualisation
+matplotlib
+seaborn
+plotly
