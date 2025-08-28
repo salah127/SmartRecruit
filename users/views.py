@@ -227,6 +227,7 @@ def profile_view(request):
         candidatures_stats = {
             'total': candidatures.count(),
             'en_attente': candidatures.filter(status='en_attente').count(),
+            'en_cours': candidatures.filter(status='en_cours').count(),
             'acceptees': candidatures.filter(status='acceptee').count(),
             'refusees': candidatures.filter(status='refusee').count(),
         }

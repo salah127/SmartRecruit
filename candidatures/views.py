@@ -507,6 +507,7 @@ def my_candidatures_view(request):
     stats = {
         'total': all_candidatures.count(),
         'en_attente': all_candidatures.filter(status='en_attente').count(),
+        'en_cours': all_candidatures.filter(status='en_cours').count(),
         'acceptees': all_candidatures.filter(status='acceptee').count(),
         'refusees': all_candidatures.filter(status='refusee').count(),
     }

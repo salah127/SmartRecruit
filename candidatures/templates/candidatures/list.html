@@ -170,7 +170,7 @@
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     {% if candidature.cv %}
-                                        <a href="{% url 'candidatures:download_cv' candidature.id %}" class="btn btn-outline-success" title="Télécharger CV">
+                                        <a href="{{ candidature.cv.url }}" class="btn btn-outline-success" title="Télécharger CV" target="_blank">
                                             <i class="fas fa-download"></i>
                                         </a>
                                     {% endif %}
