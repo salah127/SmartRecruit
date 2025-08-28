@@ -1,0 +1,26 @@
+SmartRecruit - Nouvelle candidature reçue
+
+Bonjour,
+
+Une nouvelle candidature vient d'être soumise sur la plateforme SmartRecruit.
+
+Détails de la candidature :
+- Candidat : {{ candidat.first_name|default:"" }} {{ candidat.last_name|default:"" }} ({{ candidat.username }})
+- Email : {{ candidat.email }}
+{% if candidat.phone %}- Téléphone : {{ candidat.phone }}{% endif %}
+- Poste visé : {{ candidature.poste }}
+- Date de candidature : {{ candidature.date_candidature|date:"d/m/Y à H:i" }}
+
+{% if candidature.message %}
+Message du candidat :
+{{ candidature.message }}
+{% endif %}
+
+Documents joints :
+- CV : {{ candidature.cv_filename|default:"Non fourni" }}
+{% if candidature.lettre_motivation %}- Lettre de motivation : {{ candidature.lettre_filename }}{% endif %}
+
+Connectez-vous à la plateforme pour consulter le détail de cette candidature et télécharger les documents.
+
+Ceci est un message automatique, merci de ne pas y répondre.
+© SmartRecruit - Système de gestion des candidatures

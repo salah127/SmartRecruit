@@ -1,0 +1,20 @@
+SmartRecruit - Mise à jour de votre candidature
+
+Bonjour {{ candidat.first_name|default:candidat.username }},
+
+Nous avons une mise à jour concernant votre candidature pour le poste de {{ candidature.poste }}.
+
+Nouveau statut : {{ status_display }}
+
+{% if candidature.commentaire_recruteur %}
+Commentaire du recruteur :
+{{ candidature.commentaire_recruteur }}
+{% endif %}
+
+Date de candidature : {{ candidature.date_candidature|date:"d/m/Y à H:i" }}
+{% if candidature.date_reponse %}Date de réponse : {{ candidature.date_reponse|date:"d/m/Y à H:i" }}{% endif %}
+
+Vous pouvez consulter le détail de votre candidature en vous connectant à votre espace candidat.
+
+Ceci est un message automatique, merci de ne pas y répondre.
+© SmartRecruit - Système de gestion des candidatures
