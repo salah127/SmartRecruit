@@ -1,0 +1,242 @@
+{% extends 'base.html' %} {% block title %}Accueil - SmartRecruit{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<div class="row mb-5">
+  <div class="col-12">
+    {% if user.is_authenticated %}
+    <div class="bg-primary text-white rounded p-5 text-center">
+      <h1 class="display-4 fw-bold mb-3">
+        Bienvenue, {{ user.first_name|default:user.username }} !
+      </h1>
+      <p class="lead">
+        {% if user.is_admin %} Gérez les utilisateurs et supervisez l'ensemble
+        de la plateforme. {% elif user.is_recruiter %} Trouvez les meilleurs
+        talents et gérez vos candidatures. {% else %} Découvrez de nouvelles
+        opportunités et postulez facilement. {% endif %}
+      </p>
+      <div class="mt-4">
+        {% if user.is_candidate %}
+        <a
+          href="{% url 'candidatures:create' %}"
+          class="btn btn-light btn-lg me-3"
+        >
+          <i class="fas fa-plus me-2"></i>Nouvelle Candidature
+        </a>
+        <a
+          href="{% url 'candidatures:my_candidatures' %}"
+          class="btn btn-outline-light btn-lg"
+        >
+          <i class="fas fa-file-alt me-2"></i>Mes Candidatures
+        </a>
+        {% elif user.is_recruiter or user.is_admin %}
+        <a
+          href="{% url 'candidatures:dashboard' %}"
+          class="btn btn-light btn-lg me-3"
+        >
+          <i class="fas fa-chart-bar me-2"></i>Tableau de Bord
+        </a>
+        <a
+          href="{% url 'candidatures:list' %}"
+          class="btn btn-outline-light btn-lg"
+        >
+          <i class="fas fa-list me-2"></i>Candidatures
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-primary text-white rounded p-5 text-center">
+      <h1 class="display-4 fw-bold mb-3">SmartRecruit</h1>
+      <p class="lead mb-4">
+        La plateforme de recrutement intelligente qui connecte les talents avec
+        les opportunités
+      </p>
+      <a href="{% url 'users:register' %}" class="btn btn-light btn-lg me-3">
+        <i class="fas fa-user-plus me-2"></i>Commencer gratuitement
+      </a>
+      <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
+        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if user.is_authenticated %}
+<!-- Dashboard Cards for authenticated users -->
+<div class="row mb-5">
+  {% if user.is_candidate %}
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-primary mb-3">
+          <i class="fas fa-file-alt fa-3x"></i>
+        </div>
+        <h5 class="card-title">Mes Candidatures</h5>
+        <p class="card-text">
+          Consultez et gérez toutes vos candidatures en cours.
+        </p>
+        <a
+          href="{% url 'candidatures:my_candidatures' %}"
+          class="btn btn-primary"
+        >
+          Voir mes candidatures
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-success mb-3">
+          <i class="fas fa-plus-circle fa-3x"></i>
+        </div>
+        <h5 class="card-title">Nouvelle Candidature</h5>
+        <p class="card-text">
+          Postulez rapidement à une nouvelle offre d'emploi.
+        </p>
+        <a href="{% url 'candidatures:create' %}" class="btn btn-success">
+          Postuler maintenant
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-info mb-3">
+          <i class="fas fa-user-edit fa-3x"></i>
+        </div>
+        <h5 class="card-title">Mon Profil</h5>
+        <p class="card-text">Mettez à jour vos informations personnelles.</p>
+        <a href="{% url 'users:profile' %}" class="btn btn-info">
+          Modifier le profil
+        </a>
+      </div>
+    </div>
+  </div>
+  {% elif user.is_recruiter or user.is_admin %}
+  <div class="col-lg-3 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-primary mb-3">
+          <i class="fas fa-chart-bar fa-3x"></i>
+        </div>
+        <h5 class="card-title">Tableau de Bord</h5>
+        <p class="card-text">Statistiques et analyses des candidatures.</p>
+        <a href="{% url 'candidatures:dashboard' %}" class="btn btn-primary">
+          Voir le tableau de bord
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-success mb-3">
+          <i class="fas fa-list fa-3x"></i>
+        </div>
+        <h5 class="card-title">Candidatures</h5>
+        <p class="card-text">Gérez toutes les candidatures reçues.</p>
+        <a href="{% url 'candidatures:list' %}" class="btn btn-success">
+          Voir les candidatures
+        </a>
+      </div>
+    </div>
+  </div>
+  {% if user.is_admin %}
+  <div class="col-lg-3 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-warning mb-3">
+          <i class="fas fa-users fa-3x"></i>
+        </div>
+        <h5 class="card-title">Utilisateurs</h5>
+        <p class="card-text">Gérez les comptes utilisateurs.</p>
+        <a href="{% url 'users:list' %}" class="btn btn-warning">
+          Gérer les utilisateurs
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="col-lg-3 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-info mb-3">
+          <i class="fas fa-bell fa-3x"></i>
+        </div>
+        <h5 class="card-title">Notifications</h5>
+        <p class="card-text">Consultez vos notifications récentes.</p>
+        <a href="#" class="btn btn-info"> Voir les notifications </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<!-- Features Section for non-authenticated users -->
+<div class="row mb-5">
+  <div class="col-12">
+    <h2 class="text-center mb-5">Pourquoi choisir SmartRecruit ?</h2>
+  </div>
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-primary mb-3">
+          <i class="fas fa-rocket fa-3x"></i>
+        </div>
+        <h5 class="card-title">Rapide et Efficace</h5>
+        <p class="card-text">
+          Postulez en quelques clics et suivez vos candidatures en temps réel.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-success mb-3">
+          <i class="fas fa-shield-alt fa-3x"></i>
+        </div>
+        <h5 class="card-title">Sécurisé</h5>
+        <p class="card-text">
+          Vos données sont protégées avec les dernières technologies de
+          sécurité.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 text-center">
+      <div class="card-body">
+        <div class="text-info mb-3">
+          <i class="fas fa-users fa-3x"></i>
+        </div>
+        <h5 class="card-title">Communauté</h5>
+        <p class="card-text">
+          Rejoignez une communauté de professionnels et d'entreprises.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Section -->
+<div class="row">
+  <div class="col-12">
+    <div class="card bg-light">
+      <div class="card-body text-center py-5">
+        <h3 class="mb-4">Prêt à commencer ?</h3>
+        <p class="lead mb-4">
+          Créez votre compte dès maintenant et découvrez toutes les opportunités
+          qui vous attendent.
+        </p>
+        <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-user-plus me-2"></i>Créer un compte gratuit
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endblock %}

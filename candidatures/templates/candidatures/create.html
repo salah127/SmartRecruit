@@ -1,0 +1,127 @@
+{% extends 'base.html' %} {% block title %}Nouvelle Candidature - SmartRecruit{%endblock %} {% block content %}
+<div class="card">
+  <div class="card-header">
+    <h4><i class="fas fa-plus-circle me-2"></i>Nouvelle Candidature</h4>
+    <p class="text-muted mb-0">
+      Postulez pour un poste en remplissant ce formulaire
+    </p>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %} {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field, errors in form.errors.items %} {% for error in errors %}
+        <p class="mb-1">{{ error }}</p>
+        {% endfor %} {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="{{ form.poste.id_for_label }}" class="form-label">
+          <i class="fas fa-briefcase me-1"></i>Poste visé
+        </label>
+        <input
+          type="text"
+          class="form-control {% if form.poste.errors %}is-invalid{% endif %}"
+          id="{{ form.poste.id_for_label }}"
+          name="{{ form.poste.name }}"
+          value="{{ form.poste.value|default:'' }}"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.cv.id_for_label }}" class="form-label">
+          <i class="fas fa-file-pdf me-1"></i>CV (PDF)
+        </label>
+        <input
+          type="file"
+          class="form-control {% if form.cv.errors %}is-invalid{% endif %}"
+          id="{{ form.cv.id_for_label }}"
+          name="{{ form.cv.name }}"
+          accept=".pdf"
+          required
+        />
+        <small class="form-text text-muted"
+          >Format PDF uniquement, taille maximale 5MB</small
+        >
+      </div>
+
+      <div class="mb-3">
+        <label
+          for="{{ form.lettre_motivation.id_for_label }}"
+          class="form-label"
+        >
+          <i class="fas fa-file-alt me-1"></i>Lettre de motivation (PDF)
+        </label>
+        <input
+          type="file"
+          class="form-control {% if form.lettre_motivation.errors %}is-invalid{% endif %}"
+          id="{{ form.lettre_motivation.id_for_label }}"
+          name="{{ form.lettre_motivation.name }}"
+          accept=".pdf"
+          required
+        />
+        <small class="form-text text-muted"
+          >Format PDF uniquement, taille maximale 5MB</small
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.message.id_for_label }}" class="form-label">
+          <i class="fas fa-comment me-1"></i>Message de candidature
+        </label>
+        <textarea
+          class="form-control {% if form.message.errors %}is-invalid{% endif %}"
+          id="{{ form.message.id_for_label }}"
+          name="{{ form.message.name }}"
+          rows="5"
+          placeholder="Expliquez pourquoi vous souhaitez postuler à ce poste..."
+        >
+{{ form.message.value|default:'' }}</textarea
+        >
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label
+            for="{{ form.salaire_souhaite.id_for_label }}"
+            class="form-label"
+          >
+            <i class="fas fa-euro-sign me-1"></i>Salaire souhaité (€/an)
+          </label>
+          <input
+            type="number"
+            class="form-control {% if form.salaire_souhaite.errors %}is-invalid{% endif %}"
+            id="{{ form.salaire_souhaite.id_for_label }}"
+            name="{{ form.salaire_souhaite.name }}"
+            value="{{ form.salaire_souhaite.value|default:'' }}"
+            min="0"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="{{ form.disponibilite.id_for_label }}" class="form-label">
+            <i class="fas fa-calendar me-1"></i>Disponibilité
+          </label>
+          <input
+            type="date"
+            class="form-control {% if form.disponibilite.errors %}is-invalid{% endif %}"
+            id="{{ form.disponibilite.id_for_label }}"
+            name="{{ form.disponibilite.name }}"
+            value="{{ form.disponibilite.value|default:'' }}"
+          />
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane me-2"></i>Envoyer la candidature
+        </button>
+        <a href="{% url 'users:home' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-times me-2"></i>Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

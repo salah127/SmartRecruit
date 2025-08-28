@@ -2,9 +2,16 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.paginator import Paginator
+from django.db.models import Q, Count
 from .serializers import UserSerializer, UserListSerializer, UserUpdateSerializer
 from .permissions import IsAdminUser, IsOwnerOrAdmin, IsAdminOrRecruiter
+from .forms import CustomUserCreationForm, UserProfileForm, CustomAuthenticationForm
 
 User = get_user_model()
 
@@ -129,3 +136,156 @@ class UserViewSet(viewsets.ModelViewSet):
         
         serializer = UserListSerializer(user)
         return Response(serializer.data)
+
+
+# ============ TEMPLATE-BASED VIEWS ============
+
+def home_view(request):
+    """
+    Home page view
+    """
+    return render(request, 'home.html')
+
+
+def login_view(request):
+    """
+    Login view
+    """
+    if request.user.is_authenticated:
+        return redirect('users:home')
+    
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Bienvenue, {user.first_name or user.username} !')
+                next_url = request.GET.get('next', 'users:home')
+                return redirect(next_url)
+        else:
+            messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
+    else:
+        form = CustomAuthenticationForm()
+    
+    return render(request, 'users/login.html', {'form': form})
+
+
+def register_view(request):
+    """
+    Registration view
+    """
+    if request.user.is_authenticated:
+        return redirect('users:home')
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.')
+            return redirect('users:login')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'users/register.html', {'form': form})
+
+
+def logout_view(request):
+    """
+    Logout view
+    """
+    logout(request)
+    messages.info(request, 'Vous avez été déconnecté avec succès.')
+    return redirect('users:home')
+
+
+@login_required
+def profile_view(request):
+    """
+    User profile view
+    """
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Votre profil a été mis à jour avec succès.')
+            return redirect('users:profile')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
+    else:
+        form = UserProfileForm(instance=request.user)
+    
+    # Get candidature statistics for candidates
+    candidatures_stats = None
+    if request.user.is_candidate:
+        from candidatures.models import Candidature
+        candidatures = Candidature.objects.filter(candidat=request.user)
+        candidatures_stats = {
+            'total': candidatures.count(),
+            'en_attente': candidatures.filter(status='en_attente').count(),
+            'acceptees': candidatures.filter(status='acceptee').count(),
+            'refusees': candidatures.filter(status='refusee').count(),
+        }
+    
+    return render(request, 'users/profile.html', {
+        'form': form,
+        'candidatures_stats': candidatures_stats
+    })
+
+
+@login_required
+def users_list_view(request):
+    """
+    Users list view (admin only)
+    """
+    if not request.user.is_admin:
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('users:home')
+    
+    users_queryset = User.objects.all().order_by('-created_at')
+    
+    # Search filter
+    search = request.GET.get('search')
+    if search:
+        users_queryset = users_queryset.filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(username__icontains=search) |
+            Q(email__icontains=search)
+        )
+    
+    # Role filter
+    role = request.GET.get('role')
+    if role:
+        users_queryset = users_queryset.filter(role=role)
+    
+    # Pagination
+    paginator = Paginator(users_queryset, 20)
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    
+    return render(request, 'users/list.html', {'users': users})
+
+
+@login_required
+def settings_view(request):
+    """
+    User settings view
+    """
+    return render(request, 'users/settings.html')
+
+
+@login_required
+def change_password_view(request):
+    """
+    Change password view
+    """
+    if request.method == 'POST':
+        # This would be implemented with PasswordChangeForm
+        pass
+    
+    return render(request, 'users/change_password.html')

@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidatures - SmartRecruit{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-list me-2"></i>Gestion des Candidatures</h2>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="exportCandidatures()">
+            <i class="fas fa-download me-2"></i>Exporter
+        </button>
+        <a href="{% url 'candidatures:dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-chart-bar me-2"></i>Tableau de Bord
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.total|default:0 }}</h4>
+                <small>Total</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.en_attente|default:0 }}</h4>
+                <small>En attente</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.en_cours|default:0 }}</h4>
+                <small>En cours</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.acceptees|default:0 }}</h4>
+                <small>Acceptées</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.refusees|default:0 }}</h4>
+                <small>Refusées</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.non_assignees|default:0 }}</h4>
+                <small>Non assignées</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select class="form-select" id="statusFilter">
+            <option value="">Tous les statuts</option>
+            <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours d'examen</option>
+            <option value="acceptee">Acceptée</option>
+            <option value="refusee">Refusée</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" id="recruiterFilter">
+            <option value="">Tous les recruteurs</option>
+            <option value="unassigned">Non assignées</option>
+            {% for recruiter in recruiters %}
+                <option value="{{ recruiter.id }}">{{ recruiter.first_name }} {{ recruiter.last_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <input type="text" class="form-control" id="searchInput" placeholder="Rechercher par candidat, poste, entreprise...">
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+            <i class="fas fa-undo me-1"></i>Reset
+        </button>
+    </div>
+</div>
+
+<!-- Candidatures Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="candidaturesTable">
+                <thead>
+                    <tr>
+                        <th>Candidat</th>
+                        <th>Poste</th>
+                        <th>Entreprise</th>
+                        <th>Statut</th>
+                        <th>Recruteur</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidature in candidatures %}
+                        <tr class="candidature-row" 
+                            data-status="{{ candidature.status }}" 
+                            data-recruiter="{{ candidature.recruteur_assigne.id|default:'unassigned' }}"
+                            data-search="{{ candidature.candidat.first_name }} {{ candidature.candidat.last_name }} {{ candidature.poste }} {{ candidature.entreprise }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="mb-0">{{ candidature.candidat.first_name }} {{ candidature.candidat.last_name }}</h6>
+                                        <small class="text-muted">{{ candidature.candidat.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <strong>{{ candidature.poste }}</strong>
+                                {% if candidature.salaire_souhaite %}
+                                    <br><small class="text-muted">{{ candidature.salaire_souhaite }}€/an</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ candidature.entreprise }}</td>
+                            <td>
+                                <select class="form-select form-select-sm status-select" 
+                                        data-candidature-id="{{ candidature.id }}"
+                                        onchange="updateStatus(this)">
+                                    <option value="en_attente" {% if candidature.status == 'en_attente' %}selected{% endif %}>En attente</option>
+                                    <option value="en_cours" {% if candidature.status == 'en_cours' %}selected{% endif %}>En cours d'examen</option>
+                                    <option value="acceptee" {% if candidature.status == 'acceptee' %}selected{% endif %}>Acceptée</option>
+                                    <option value="refusee" {% if candidature.status == 'refusee' %}selected{% endif %}>Refusée</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm recruiter-select" 
+                                        data-candidature-id="{{ candidature.id }}"
+                                        onchange="assignRecruiter(this)">
+                                    <option value="">Non assignée</option>
+                                    {% for recruiter in recruiters %}
+                                        <option value="{{ recruiter.id }}" 
+                                                {% if candidature.recruteur_assigne.id == recruiter.id %}selected{% endif %}>
+                                            {{ recruiter.first_name }} {{ recruiter.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <small>{{ candidature.date_candidature|date:"d/m/Y H:i" }}</small>
+                                {% if candidature.date_reponse %}
+                                    <br><small class="text-muted">Réponse: {{ candidature.date_reponse|date:"d/m/Y" }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewCandidature({{ candidature.id }})" title="Voir les détails">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if candidature.cv %}
+                                        <a href="{% url 'candidatures:download_cv' candidature.id %}" class="btn btn-outline-success" title="Télécharger CV">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    {% endif %}
+                                    <button class="btn btn-outline-info" onclick="addComment({{ candidature.id }})" title="Ajouter un commentaire">
+                                        <i class="fas fa-comment"></i>
+                                    </button>
+                                    {% if user.is_admin %}
+                                        <button class="btn btn-outline-danger" onclick="deleteCandidature({{ candidature.id }})" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Aucune candidature trouvée</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if candidatures.has_other_pages %}
+    <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if candidatures.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ candidatures.previous_page_number }}">Précédent</a>
+                </li>
+            {% endif %}
+            
+            {% for num in candidatures.paginator.page_range %}
+                {% if candidatures.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > candidatures.number|add:'-3' and num < candidatures.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if candidatures.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ candidatures.next_page_number }}">Suivant</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un commentaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="commentForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="candidatureId" name="candidature_id">
+                    <div class="mb-3">
+                        <label for="commentText" class="form-label">Commentaire</label>
+                        <textarea class="form-control" id="commentText" name="comment" rows="4" 
+                                  placeholder="Ajoutez vos observations sur cette candidature..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveComment()">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter functionality
+document.getElementById('statusFilter').addEventListener('change', filterCandidatures);
+document.getElementById('recruiterFilter').addEventListener('change', filterCandidatures);
+document.getElementById('searchInput').addEventListener('input', filterCandidatures);
+
+function filterCandidatures() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const recruiterFilter = document.getElementById('recruiterFilter').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('.candidature-row');
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const recruiter = row.dataset.recruiter;
+        const searchText = row.dataset.search.toLowerCase();
+        
+        const statusMatch = !statusFilter || status === statusFilter;
+        const recruiterMatch = !recruiterFilter || recruiter === recruiterFilter;
+        const searchMatch = !searchTerm || searchText.includes(searchTerm);
+        
+        row.style.display = statusMatch && recruiterMatch && searchMatch ? '' : 'none';
+    });
+}
+
+function resetFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('recruiterFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    filterCandidatures();
+}
+
+function updateStatus(select) {
+    const candidatureId = select.dataset.candidatureId;
+    const newStatus = select.value;
+    
+    fetch(`/api/candidatures/${candidatureId}/update_status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            status: newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update row data
+            select.closest('tr').dataset.status = newStatus;
+            showNotification('Statut mis à jour avec succès', 'success');
+        } else {
+            showNotification('Erreur lors de la mise à jour du statut', 'error');
+            // Revert the select value
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Erreur lors de la mise à jour du statut', 'error');
+        location.reload();
+    });
+}
+
+function assignRecruiter(select) {
+    const candidatureId = select.dataset.candidatureId;
+    const recruiterId = select.value;
+    
+    fetch(`/api/candidatures/${candidatureId}/assign_recruiter/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            recruiter_id: recruiterId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update row data
+            select.closest('tr').dataset.recruiter = recruiterId || 'unassigned';
+            showNotification('Recruteur assigné avec succès', 'success');
+        } else {
+            showNotification('Erreur lors de l\'assignation du recruteur', 'error');
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Erreur lors de l\'assignation du recruteur', 'error');
+        location.reload();
+    });
+}
+
+function viewCandidature(candidatureId) {
+    window.open(`/candidatures/${candidatureId}/`, '_blank');
+}
+
+function addComment(candidatureId) {
+    document.getElementById('candidatureId').value = candidatureId;
+    document.getElementById('commentText').value = '';
+    new bootstrap.Modal(document.getElementById('commentModal')).show();
+}
+
+function saveComment() {
+    const candidatureId = document.getElementById('candidatureId').value;
+    const comment = document.getElementById('commentText').value;
+    
+    if (!comment.trim()) {
+        alert('Veuillez saisir un commentaire');
+        return;
+    }
+    
+    fetch(`/api/candidatures/${candidatureId}/update_status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            commentaire: comment
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+            showNotification('Commentaire ajouté avec succès', 'success');
+        } else {
+            showNotification('Erreur lors de l\'ajout du commentaire', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Erreur lors de l\'ajout du commentaire', 'error');
+    });
+}
+
+function deleteCandidature(candidatureId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette candidature ?')) {
+        fetch(`/api/candidatures/${candidatureId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Erreur lors de la suppression', 'error');
+        });
+    }
+}
+
+function exportCandidatures() {
+    window.location.href = '/api/candidatures/export/';
+}
+
+function showNotification(message, type) {
+    // Create and show a toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}
