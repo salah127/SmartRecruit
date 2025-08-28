@@ -1,0 +1,29 @@
+SmartRecruit - Candidature assignée
+
+Bonjour {{ recruteur.first_name|default:recruteur.username }},
+
+Une candidature vous a été assignée :
+
+Détails de la candidature :
+- Candidat : {{ candidat.first_name|default:"" }} {{ candidat.last_name|default:"" }} ({{ candidat.username }})
+- Email : {{ candidat.email }}
+{% if candidat.phone %}- Téléphone : {{ candidat.phone }}{% endif %}
+- Poste visé : {{ candidature.poste }}
+- Date de candidature : {{ candidature.date_candidature|date:"d/m/Y à H:i" }}
+- Statut actuel : {{ candidature.get_status_display }}
+
+{% if candidature.message %}
+Message du candidat :
+{{ candidature.message }}
+{% endif %}
+
+Documents disponibles :
+- CV : {{ candidature.cv_filename|default:"Non fourni" }}
+{% if candidature.lettre_motivation %}- Lettre de motivation : {{ candidature.lettre_filename }}{% endif %}
+
+Vous êtes maintenant responsable du suivi de cette candidature. Vous pouvez consulter les détails, télécharger les documents et mettre à jour le statut.
+
+Connectez-vous à la plateforme pour plus de détails.
+
+Ceci est un message automatique, merci de ne pas y répondre.
+© SmartRecruit - Système de gestion des candidatures

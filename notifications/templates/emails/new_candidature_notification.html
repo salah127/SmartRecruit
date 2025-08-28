@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Nouvelle candidature reçue</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background-color: #007bff;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .candidate-info {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .button {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📋 Nouvelle candidature reçue</h1>
+      </div>
+
+      <div class="content">
+        <h3>Bonjour,</h3>
+
+        <p>
+          Une nouvelle candidature vient d'être soumise sur la plateforme
+          SmartRecruit.
+        </p>
+
+        <div class="candidate-info">
+          <h4>Détails de la candidature :</h4>
+          <ul>
+            <li>
+              <strong>Candidat :</strong> {{ candidat.first_name|default:"" }}
+              {{ candidat.last_name|default:"" }} ({{ candidat.username }})
+            </li>
+            <li><strong>Email :</strong> {{ candidat.email }}</li>
+            {% if candidat.phone %}
+            <li><strong>Téléphone :</strong> {{ candidat.phone }}</li>
+            {% endif %}
+            <li><strong>Poste visé :</strong> {{ candidature.poste }}</li>
+            <li>
+              <strong>Date de candidature :</strong> {{
+              candidature.date_candidature|date:"d/m/Y à H:i" }}
+            </li>
+          </ul>
+
+          {% if candidature.message %}
+          <div style="margin-top: 15px">
+            <strong>Message du candidat :</strong><br />
+            <em>{{ candidature.message }}</em>
+          </div>
+          {% endif %}
+        </div>
+
+        <p><strong>Documents joints :</strong></p>
+        <ul>
+          <li>CV : {{ candidature.cv_filename|default:"Non fourni" }}</li>
+          {% if candidature.lettre_motivation %}
+          <li>Lettre de motivation : {{ candidature.lettre_filename }}</li>
+          {% endif %}
+        </ul>
+
+        <p>
+          Connectez-vous à la plateforme pour consulter le détail de cette
+          candidature et télécharger les documents.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>Ceci est un message automatique, merci de ne pas y répondre.</p>
+        <p>© SmartRecruit - Système de gestion des candidatures</p>
+      </div>
+    </div>
+  </body>
+</html>

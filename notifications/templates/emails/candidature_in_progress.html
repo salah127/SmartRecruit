@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Candidature en cours d'examen</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background-color: #ffc107;
+        color: #212529;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .info {
+        padding: 15px;
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+        border-radius: 5px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>⏳ Candidature en cours d'examen</h1>
+      </div>
+
+      <div class="content">
+        <h3>Bonjour {{ candidat.first_name|default:candidat.username }},</h3>
+
+        <div class="info">
+          <h3>Votre candidature est en cours d'examen</h3>
+          <p>
+            Nous étudions actuellement votre candidature pour le poste de
+            <strong>{{ candidature.poste }}</strong>.
+          </p>
+        </div>
+
+        {% if candidature.commentaire_recruteur %}
+        <div
+          style="
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-left: 4px solid #ffc107;
+          "
+        >
+          <strong>Message du recruteur :</strong><br />
+          {{ candidature.commentaire_recruteur }}
+        </div>
+        {% endif %}
+
+        <p>
+          Nous vous tiendrons informé(e) de l'évolution de votre candidature
+          dans les plus brefs délais.
+        </p>
+
+        <p><strong>Que se passe-t-il maintenant ?</strong></p>
+        <ul>
+          <li>Notre équipe de recrutement examine votre profil</li>
+          <li>Nous évaluons l'adéquation avec le poste</li>
+          <li>Vous recevrez une réponse prochainement</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p>Ceci est un message automatique, merci de ne pas y répondre.</p>
+        <p>© SmartRecruit - Système de gestion des candidatures</p>
+      </div>
+    </div>
+  </body>
+</html>

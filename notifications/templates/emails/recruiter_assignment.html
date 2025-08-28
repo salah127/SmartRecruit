@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Candidature assignée</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background-color: #17a2b8;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .assignment-info {
+        background-color: #d1ecf1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        border-left: 4px solid #17a2b8;
+      }
+      .button {
+        display: inline-block;
+        background-color: #17a2b8;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>👤 Candidature assignée</h1>
+      </div>
+
+      <div class="content">
+        <h3>Bonjour {{ recruteur.first_name|default:recruteur.username }},</h3>
+
+        <div class="assignment-info">
+          <h4>Une candidature vous a été assignée :</h4>
+          <ul>
+            <li>
+              <strong>Candidat :</strong> {{ candidat.first_name|default:"" }}
+              {{ candidat.last_name|default:"" }} ({{ candidat.username }})
+            </li>
+            <li><strong>Email :</strong> {{ candidat.email }}</li>
+            {% if candidat.phone %}
+            <li><strong>Téléphone :</strong> {{ candidat.phone }}</li>
+            {% endif %}
+            <li><strong>Poste visé :</strong> {{ candidature.poste }}</li>
+            <li>
+              <strong>Date de candidature :</strong> {{
+              candidature.date_candidature|date:"d/m/Y à H:i" }}
+            </li>
+            <li>
+              <strong>Statut actuel :</strong> {{ candidature.get_status_display
+              }}
+            </li>
+          </ul>
+        </div>
+
+        {% if candidature.message %}
+        <div
+          style="
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-left: 4px solid #17a2b8;
+          "
+        >
+          <strong>Message du candidat :</strong><br />
+          <em>{{ candidature.message }}</em>
+        </div>
+        {% endif %}
+
+        <p><strong>Documents disponibles :</strong></p>
+        <ul>
+          <li>CV : {{ candidature.cv_filename|default:"Non fourni" }}</li>
+          {% if candidature.lettre_motivation %}
+          <li>Lettre de motivation : {{ candidature.lettre_filename }}</li>
+          {% endif %}
+        </ul>
+
+        <p>
+          Vous êtes maintenant responsable du suivi de cette candidature. Vous
+          pouvez consulter les détails, télécharger les documents et mettre à
+          jour le statut.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>Ceci est un message automatique, merci de ne pas y répondre.</p>
+        <p>© SmartRecruit - Système de gestion des candidatures</p>
+      </div>
+    </div>
+  </body>
+</html>
