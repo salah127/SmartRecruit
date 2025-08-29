@@ -1,0 +1,174 @@
+{% extends 'base.html' %} {% block title %}Mon Profil - SmartRecruit{% endblock%} {% block content %}
+<div class="row">
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="mb-3">
+          <i class="fas fa-user-circle fa-5x text-primary"></i>
+        </div>
+        <h5 class="card-title">{{ user.first_name }} {{ user.last_name }}</h5>
+        <p class="text-muted">{{ user.username }}</p>
+        <span class="badge bg-primary">{{ user.get_role_display }}</span>
+        <hr />
+        <p class="text-muted mb-1">
+          <i class="fas fa-envelope me-2"></i>{{ user.email }}
+        </p>
+        {% if user.phone %}
+        <p class="text-muted mb-1">
+          <i class="fas fa-phone me-2"></i>{{ user.phone }}
+        </p>
+        {% endif %}
+        <p class="text-muted mb-0">
+          <i class="fas fa-calendar me-2"></i>Inscrit le
+          {{user.created_at|date:"d/m/Y" }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-user-edit me-2"></i>Modifier mes informations
+        </h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %} {% if form.errors %}
+          <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %} {% for error in errors%}
+            <p class="mb-1">{{ error }}</p>
+            {% endfor %} {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.first_name.id_for_label }}" class="form-label"
+                >Prénom</label
+              >
+              <input
+                type="text"
+                class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
+                id="{{ form.first_name.id_for_label }}"
+                name="{{ form.first_name.name }}"
+                value="{{ form.first_name.value|default:user.first_name }}"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.last_name.id_for_label }}" class="form-label"
+                >Nom</label
+              >
+              <input
+                type="text"
+                class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
+                id="{{ form.last_name.id_for_label }}"
+                name="{{ form.last_name.name }}"
+                value="{{ form.last_name.value|default:user.last_name }}"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.email.id_for_label }}" class="form-label"
+                >Email</label
+              >
+              <input
+                type="email"
+                class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                id="{{ form.email.id_for_label }}"
+                name="{{ form.email.name }}"
+                value="{{ form.email.value|default:user.email }}"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.phone.id_for_label }}" class="form-label"
+                >Téléphone</label
+              >
+              <input
+                type="tel"
+                class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                id="{{ form.phone.id_for_label }}"
+                name="{{ form.phone.name }}"
+                value="{{ form.phone.value|default:user.phone }}"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label"
+              >Nom d'utilisateur</label
+            >
+            <input
+              type="text"
+              class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+              id="{{ form.username.id_for_label }}"
+              name="{{ form.username.name }}"
+              value="{{ form.username.value|default:user.username }}"
+            />
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Sauvegarder
+            </button>
+            <a
+              href="{% url 'users:change_password' %}"
+              class="btn btn-outline-warning"
+            >
+              <i class="fas fa-key me-2"></i>Changer le mot de passe
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Statistics Card for candidates -->
+    {% if user.is_candidate %}
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-chart-pie me-2"></i>Mes statistiques
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-2 text-center">
+            <h4 class="text-primary">
+              {{ candidatures_stats.total|default:0 }}
+            </h4>
+            <small class="text-muted">Total candidatures</small>
+          </div>
+          <div class="col-md-2 text-center">
+            <h4 class="text-warning">
+              {{ candidatures_stats.en_attente|default:0 }}
+            </h4>
+            <small class="text-muted">En attente</small>
+          </div>
+          <div class="col-md-3 text-center">
+            <h4 class="text-info">
+              {{ candidatures_stats.en_cours|default:0 }}
+            </h4>
+            <small class="text-muted">En cours d'examen</small>
+          </div>
+          <div class="col-md-3 text-center">
+            <h4 class="text-success">
+              {{ candidatures_stats.acceptees|default:0 }}
+            </h4>
+            <small class="text-muted">Acceptées</small>
+          </div>
+          <div class="col-md-2 text-center">
+            <h4 class="text-danger">
+              {{ candidatures_stats.refusees|default:0 }}
+            </h4>
+            <small class="text-muted">Refusées</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

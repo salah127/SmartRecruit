@@ -1,0 +1,159 @@
+{% extends 'base.html' %} {% block title %}Mes Candidatures - SmartRecruit{%endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-file-alt me-2"></i>Mes Candidatures</h2>
+  <a href="{% url 'candidatures:create' %}" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i>Nouvelle Candidature
+  </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+  <div class="col-md-2">
+    <div class="card bg-primary text-white">
+      <div class="card-body text-center">
+        <i class="fas fa-file-alt fa-2x mb-2"></i>
+        <h4>{{ stats.total|default:0 }}</h4>
+        <small>Total candidatures</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card bg-warning text-white">
+      <div class="card-body text-center">
+        <i class="fas fa-clock fa-2x mb-2"></i>
+        <h4>{{ stats.en_attente|default:0 }}</h4>
+        <small>En attente</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-info text-white">
+      <div class="card-body text-center">
+        <i class="fas fa-eye fa-2x mb-2"></i>
+        <h4>{{ stats.en_cours|default:0 }}</h4>
+        <small>En cours d'examen</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-success text-white">
+      <div class="card-body text-center">
+        <i class="fas fa-check fa-2x mb-2"></i>
+        <h4>{{ stats.acceptees|default:0 }}</h4>
+        <small>Acceptées</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card bg-danger text-white">
+      <div class="card-body text-center">
+        <i class="fas fa-times fa-2x mb-2"></i>
+        <h4>{{ stats.refusees|default:0 }}</h4>
+        <small>Refusées</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Candidatures List -->
+<div class="row">
+  {% for candidature in candidatures %}
+  <div class="col-12 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <h5 class="card-title">
+              <a
+                href="{% url 'candidatures:detail' candidature.id %}"
+                class="text-decoration-none"
+              >
+                {{ candidature.poste }}
+              </a>
+            </h5>
+            <p class="card-text">{{ candidature.message|truncatewords:20 }}</p>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <div class="mb-3">
+              <span
+                class="badge {% if candidature.status == 'en_attente' %}bg-warning{% elif candidature.status == 'en_cours' %}bg-info{% elif candidature.status == 'acceptee' %}bg-success{% elif candidature.status == 'refusee' %}bg-danger{% endif %}"
+              >
+                {% if candidature.status == 'en_attente' %}
+                <i class="fas fa-clock me-1"></i>En attente {% elif candidature.status == 'en_cours' %}
+                <i class="fas fa-eye me-1"></i>En cours d'examen {% elif candidature.status == 'acceptee' %}
+                <i class="fas fa-check me-1"></i>Acceptée {% elif candidature.status == 'refusee' %}
+                <i class="fas fa-times me-1"></i>Refusée {% endif %}
+              </span>
+            </div>
+            <div class="mb-2">
+              <small class="text-muted">
+                <i class="fas fa-calendar-plus me-1"></i>
+                Postulé le {{ candidature.date_candidature|date:"d/m/Y" }}
+              </small>
+            </div>
+            <div class="btn-group btn-group-sm">
+              <a
+                href="{% url 'candidatures:detail' candidature.id %}"
+                class="btn btn-outline-primary btn-sm"
+              >
+                <i class="fas fa-eye me-1"></i>Voir
+              </a>
+              {% if candidature.status == 'en_attente' %}
+              <a
+                href="{% url 'candidatures:edit' candidature.id %}"
+                class="btn btn-outline-warning btn-sm"
+              >
+                <i class="fas fa-edit me-1"></i>Modifier
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="text-center py-5">
+      <i class="fas fa-file-alt fa-5x text-muted mb-4"></i>
+      <h4 class="text-muted">Aucune candidature pour le moment</h4>
+      <p class="text-muted mb-4">
+        Commencez par créer votre première candidature pour postuler à une offre
+        d'emploi.
+      </p>
+      <a href="{% url 'candidatures:create' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-2"></i>Créer ma première candidature
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if candidatures.has_other_pages %}
+<nav aria-label="Pagination des candidatures">
+  <ul class="pagination justify-content-center">
+    {% if candidatures.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ candidatures.previous_page_number }}"
+        >Précédent</a
+      >
+    </li>
+    {% endif %} {% for num in candidatures.paginator.page_range %} {% if candidatures.number == num %}
+    <li class="page-item active">
+      <span class="page-link">{{ num }}</span>
+    </li>
+    {% elif num > candidatures.number|add:'-3' and num < candidatures.number|add:'3' %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+    </li>
+    {% endif %} {% endfor %} {% if candidatures.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ candidatures.next_page_number }}"
+        >Suivant</a
+      >
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %} {% endblock %}

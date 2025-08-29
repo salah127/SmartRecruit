@@ -1,0 +1,65 @@
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-4 col-md-6 mb-4">
+        <h5><i class="fas fa-briefcase me-2"></i>SmartRecruit</h5>
+        <p>
+          Plateforme de recrutement intelligente pour connecter les talents avec
+          les opportunités.
+        </p>
+      </div>
+      <div class="col-lg-2 col-md-6 mb-4">
+        <h6>Navigation</h6>
+        <ul class="list-unstyled">
+          <li>
+            <a
+              href="{% url 'users:home' %}"
+              class="text-light text-decoration-none"
+              >Accueil</a
+            >
+          </li>
+          {% if not user.is_authenticated %}
+          <li>
+            <a
+              href="{% url 'users:login' %}"
+              class="text-light text-decoration-none"
+              >Connexion</a
+            >
+          </li>
+          <li>
+            <a
+              href="{% url 'users:register' %}"
+              class="text-light text-decoration-none"
+              >Inscription</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4">
+        <h6>Fonctionnalités</h6>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-check me-2"></i>Gestion des candidatures</li>
+          <li><i class="fas fa-check me-2"></i>Tableau de bord</li>
+          <li><i class="fas fa-check me-2"></i>Notifications</li>
+          <li><i class="fas fa-check me-2"></i>Rapports</li>
+        </ul>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4">
+        <h6>Contact</h6>
+        <p class="mb-1">
+          <i class="fas fa-envelope me-2"></i>contact@smartrecruit.com
+        </p>
+        <p class="mb-1"><i class="fas fa-phone me-2"></i>+33 1 00 00 00 00</p>
+        <div class="mt-3">
+          <a href="#" class="text-light me-3"
+            ><i class="fab fa-linkedin"></i
+          ></a>
+          <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-light"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4" />
+  </div>
+</footer>

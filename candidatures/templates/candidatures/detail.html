@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidature - {{ candidature.poste }} - SmartRecruit{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'users:home' %}">Accueil</a></li>
+                {% if user.is_candidate %}
+                    <li class="breadcrumb-item"><a href="{% url 'candidatures:my_candidatures' %}">Mes Candidatures</a></li>
+                {% else %}
+                    <li class="breadcrumb-item"><a href="{% url 'candidatures:list' %}">Candidatures</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ candidature.poste }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h4 class="mb-1">{{ candidature.poste }}</h4>
+                        <h6 class="text-muted">{{ candidature.entreprise }}</h6>
+                    </div>
+                    <span class="badge 
+                        {% if candidature.status == 'en_attente' %}bg-warning
+                        {% elif candidature.status == 'en_cours' %}bg-info
+                        {% elif candidature.status == 'acceptee' %}bg-success
+                        {% elif candidature.status == 'refusee' %}bg-danger
+                        {% endif %} status-badge">
+                        {% if candidature.status == 'en_attente' %}
+                            <i class="fas fa-clock me-1"></i>En attente
+                        {% elif candidature.status == 'en_cours' %}
+                            <i class="fas fa-eye me-1"></i>En cours d'examen
+                        {% elif candidature.status == 'acceptee' %}
+                            <i class="fas fa-check me-1"></i>Acceptée
+                        {% elif candidature.status == 'refusee' %}
+                            <i class="fas fa-times me-1"></i>Refusée
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user me-2"></i>Candidat</h6>
+                        <p>{{ candidature.candidat.first_name }} {{ candidature.candidat.last_name }}</p>
+                        <p class="text-muted mb-0">{{ candidature.candidat.email }}</p>
+                        {% if candidature.candidat.phone %}
+                            <p class="text-muted">{{ candidature.candidat.phone }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calendar me-2"></i>Informations</h6>
+                        <p><strong>Date de candidature:</strong> {{ candidature.date_candidature|date:"d/m/Y à H:i" }}</p>
+                        {% if candidature.date_reponse %}
+                            <p><strong>Date de réponse:</strong> {{ candidature.date_reponse|date:"d/m/Y à H:i" }}</p>
+                        {% endif %}
+                        {% if candidature.salaire_souhaite %}
+                            <p><strong>Salaire souhaité:</strong> {{ candidature.salaire_souhaite }}€/an</p>
+                        {% endif %}
+                        {% if candidature.disponibilite %}
+                            <p><strong>Disponibilité:</strong> {{ candidature.disponibilite }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if candidature.competences %}
+                    <div class="mb-4">
+                        <h6><i class="fas fa-tags me-2"></i>Compétences</h6>
+                        <div>
+                            {% for competence in candidature.competences|split:"," %}
+                                <span class="badge bg-secondary me-1 mb-1">{{ competence|strip }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <h6><i class="fas fa-heart me-2"></i>Lettre de motivation</h6>
+                    <div class="bg-light p-3 rounded">
+                        {{ candidature.motivation|linebreaks }}
+                    </div>
+                </div>
+                
+                {% if candidature.commentaire_recruteur %}
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-comment me-2"></i>Commentaire du recruteur</h6>
+                        <p class="mb-0">{{ candidature.commentaire_recruteur|linebreaks }}</p>
+                        {% if candidature.recruteur_assigne %}
+                            <small class="text-muted">
+                                Par {{ candidature.recruteur_assigne.first_name }} {{ candidature.recruteur_assigne.last_name }}
+                            </small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Actions Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Actions</h6>
+            </div>
+            <div class="card-body">
+                {% if candidature.cv %}
+                    <a href="{% url 'candidatures:download_cv' candidature.id %}" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-download me-2"></i>Télécharger CV
+                    </a>
+                {% endif %}
+                
+                {% if candidature.lettre_motivation %}
+                    <a href="{% url 'candidatures:download_lettre' candidature.id %}" class="btn btn-outline-success w-100 mb-2">
+                        <i class="fas fa-download me-2"></i>Télécharger Lettre
+                    </a>
+                {% endif %}
+                
+                {% if user.is_candidate and candidature.candidat == user and candidature.status == 'en_attente' %}
+                    <a href="{% url 'candidatures:edit' candidature.id %}" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                {% endif %}
+                
+                {% if user.is_recruiter or user.is_admin %}
+                    <button class="btn btn-info w-100 mb-2" onclick="showStatusModal()">
+                        <i class="fas fa-edit me-2"></i>Changer le statut
+                    </button>
+                    
+                    <button class="btn btn-outline-info w-100 mb-2" onclick="showAssignModal()">
+                        <i class="fas fa-user-plus me-2"></i>Assigner recruteur
+                    </button>
+                    
+                    <button class="btn btn-outline-warning w-100" onclick="showCommentModal()">
+                        <i class="fas fa-comment me-2"></i>Ajouter commentaire
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Assignment Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-user-tie me-2"></i>Assignation</h6>
+            </div>
+            <div class="card-body">
+                {% if candidature.recruteur_assigne %}
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-circle fa-2x text-primary me-3"></i>
+                        <div>
+                            <h6 class="mb-0">{{ candidature.recruteur_assigne.first_name }} {{ candidature.recruteur_assigne.last_name }}</h6>
+                            <small class="text-muted">{{ candidature.recruteur_assigne.email }}</small>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Aucun recruteur assigné
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Timeline Card -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-history me-2"></i>Historique</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Candidature envoyée</h6>
+                            <small class="text-muted">{{ candidature.date_candidature|date:"d/m/Y à H:i" }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if candidature.recruteur_assigne %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Assignée à un recruteur</h6>
+                                <small class="text-muted">{{ candidature.recruteur_assigne.first_name }} {{ candidature.recruteur_assigne.last_name }}</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if candidature.status == 'en_cours' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">En cours d'examen</h6>
+                                <small class="text-muted">Candidature en cours de traitement</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if candidature.date_reponse %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker 
+                                {% if candidature.status == 'acceptee' %}bg-success
+                                {% elif candidature.status == 'refusee' %}bg-danger
+                                {% else %}bg-secondary{% endif %}"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">
+                                    {% if candidature.status == 'acceptee' %}
+                                        Candidature acceptée
+                                    {% elif candidature.status == 'refusee' %}
+                                        Candidature refusée
+                                    {% else %}
+                                        Statut mis à jour
+                                    {% endif %}
+                                </h6>
+                                <small class="text-muted">{{ candidature.date_reponse|date:"d/m/Y à H:i" }}</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for recruiters/admins -->
+{% if user.is_recruiter or user.is_admin %}
+    <!-- Status Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Changer le statut</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="statusForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="newStatus" class="form-label">Nouveau statut</label>
+                            <select class="form-select" id="newStatus" name="status">
+                                <option value="en_attente" {% if candidature.status == 'en_attente' %}selected{% endif %}>En attente</option>
+                                <option value="en_cours" {% if candidature.status == 'en_cours' %}selected{% endif %}>En cours d'examen</option>
+                                <option value="acceptee" {% if candidature.status == 'acceptee' %}selected{% endif %}>Acceptée</option>
+                                <option value="refusee" {% if candidature.status == 'refusee' %}selected{% endif %}>Refusée</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="statusComment" class="form-label">Commentaire (optionnel)</label>
+                            <textarea class="form-control" id="statusComment" name="commentaire" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="updateStatus()">Sauvegarder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding: 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    padding-bottom: 1rem;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 1.5rem;
+    bottom: -1rem;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content h6 {
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showStatusModal() {
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+function updateStatus() {
+    const form = document.getElementById('statusForm');
+    const formData = new FormData(form);
+    
+    fetch(`/api/candidatures/{{ candidature.id }}/update_status/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success || data.id) {
+            location.reload();
+        } else {
+            alert('Erreur lors de la mise à jour du statut');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erreur lors de la mise à jour du statut');
+    });
+}
+</script>
+{% endblock %}
