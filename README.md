@@ -5,13 +5,13 @@
 [![DRF](https://img.shields.io/badge/DRF-Latest-orange.svg)](https://www.django-rest-framework.org/)
 [![AI](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com)
 
-## 📋 Description
+##  Description
 
 SmartRecruit est une plateforme complète de gestion des ressources humaines développée avec Django et Django REST Framework. Le système intègre des fonctionnalités d'intelligence artificielle pour l'analyse automatique des CV, un système de notifications email avancé, et une architecture sécurisée pour la gestion complète du processus de recrutement.
 
-## 🚀 Fonctionnalités Principales
+##  Fonctionnalités Principales
 
-### 👥 I. Gestion des Utilisateurs
+### I. Gestion des Utilisateurs
 
 **Système de comptes utilisateurs complet**
 - Modèle utilisateur personnalisé avec rôles définis
@@ -20,9 +20,9 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Interface d'administration intégrée
 
 **Système de rôles hiérarchique**
-- **👨‍💼 Admin** : Accès complet au système
-- **🎯 Recruteur** : Gestion des candidatures et évaluation
-- **👤 Candidat** : Soumission et suivi des candidatures
+- ** Admin** : Accès complet au système
+- ** Recruteur** : Gestion des candidatures et évaluation
+- ** Candidat** : Soumission et suivi des candidatures
 
 **Sécurité et permissions**
 - Permissions personnalisées basées sur les rôles
@@ -31,7 +31,7 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Protection contre XSS, CSRF, et injection SQL
 - Middleware de sécurité personnalisé
 
-### 📋 II. Gestion des Candidatures
+###  II. Gestion des Candidatures
 
 **Soumission de candidatures**
 - Upload sécurisé de CV (PDF, DOC, DOCX)
@@ -53,7 +53,7 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Organisation hiérarchique par utilisateur
 - Suppression automatique lors de la suppression des candidatures
 
-### 🤖 III. Intelligence Artificielle - Analyse de CV
+###  III. Intelligence Artificielle - Analyse de CV
 
 **Analyse automatique des CV**
 - Extraction intelligente du texte (PDF, DOC, DOCX)
@@ -80,7 +80,7 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Support Redis pour la gestion des tâches
 - Notifications automatiques des résultats
 
-### 📧 IV. Système de Notifications Email
+###  IV. Système de Notifications Email
 
 **Architecture de notifications complète**
 - Service de notifications centralisé
@@ -142,7 +142,7 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 
 ## Architecture Technique
 
-## 📁 Structure du Projet (Après Nettoyage)
+##  Structure du Projet (Après Nettoyage)
 
 ```
 smartrecruit/
@@ -488,7 +488,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 - Configurer les logs et monitoring
 - Sécuriser les uploads de fichiers
 
-## 🧪 Tests
+##  Tests
 
 Le projet dispose d'une **suite de tests complète** avec plus de **3,200 lignes de tests** :
 
@@ -514,10 +514,10 @@ python manage.py test users.tests.UserModelTestCase
 ```
 
 ### Types de Tests Couverts
-- ✅ **Tests unitaires** : Modèles, vues, sérialiseurs, permissions
-- ✅ **Tests d'intégration** : Workflows complets, API endpoints
-- ✅ **Tests de sécurité** : Contrôle d'accès, validation des données
-- ✅ **Tests de fichiers** : Upload, validation, traitement
+-  **Tests unitaires** : Modèles, vues, sérialiseurs, permissions
+-  **Tests d'intégration** : Workflows complets, API endpoints
+-  **Tests de sécurité** : Contrôle d'accès, validation des données
+-  **Tests de fichiers** : Upload, validation, traitement
 
 ### Tests de l'IA (Note)
 ```bash
@@ -632,18 +632,18 @@ test: Ajouter tests pour les permissions
 - Décrivez clairement la fonctionnalité souhaitée
 - Expliquez le cas d'usage et les bénéfices
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Checklist
 
-- [ ] Configurer PostgreSQL
-- [ ] Configurer Redis pour Celery
-- [ ] Variables d'environnement sécurisées
-- [ ] HTTPS et certificats SSL
-- [ ] Serveur web (Nginx + Gunicorn)
-- [ ] Monitoring et logs
-- [ ] Backups automatiques
-- [ ] Mises à jour de sécurité
+-  Configurer PostgreSQL
+-  Configurer Redis pour Celery
+-  Variables d'environnement sécurisées
+-  HTTPS et certificats SSL
+-  Serveur web (Nginx + Gunicorn)
+-  Monitoring et logs
+-  Backups automatiques
+-  Mises à jour de sécurité
 
 ### Docker (Optionnel)
 
@@ -669,7 +669,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ---
 
-**SmartRecruit** - Révolutionnez votre processus de recrutement avec l'intelligence artificielle 🚀
+**SmartRecruit** - Révolutionnez votre processus de recrutement avec l'intelligence artificielle 
 - **Code** : Commentaires dans le code source
 - **Issues** : Signalez les bugs sur GitHub
 
