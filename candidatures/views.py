@@ -14,6 +14,9 @@ from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from .models import Candidature
 from .forms import CandidatureForm, CandidatureSearchForm
 from .serializers import (
@@ -68,19 +71,27 @@ class CandidatureViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Filter queryset based on user role
+        Filter queryset based on user role with optimized database queries
         """
         user = self.request.user
         
+        # Base queryset with optimized joins
+        base_queryset = Candidature.objects.select_related(
+            'candidat',  # Always fetch candidate info
+            'recruteur_assigne'  # Always fetch assigned recruiter info
+        ).prefetch_related(
+            'analyse_ia'  # Prefetch AI analysis if exists
+        )
+        
         if user.is_admin:
             # Admins can see all candidatures
-            return Candidature.objects.all()
+            return base_queryset.all()
         elif user.is_recruiter:
             # Recruiters can see all candidatures
-            return Candidature.objects.all()
+            return base_queryset.all()
         else:
             # Candidates can only see their own candidatures
-            return Candidature.objects.filter(candidat=user)
+            return base_queryset.filter(candidat=user)
     
     def perform_create(self, serializer):
         """
@@ -91,7 +102,7 @@ class CandidatureViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_candidatures(self, request):
         """
-        Return current user's candidatures (for candidates)
+        Return current user's candidatures (for candidates) with optimized queries
         """
         if not request.user.is_candidate:
             return Response(
@@ -99,7 +110,15 @@ class CandidatureViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        candidatures = Candidature.objects.filter(candidat=request.user)
+        # Optimized query for user's candidatures
+        candidatures = Candidature.objects.filter(
+            candidat=request.user
+        ).select_related(
+            'recruteur_assigne'
+        ).prefetch_related(
+            'analyse_ia'
+        ).order_by('-date_candidature')
+        
         serializer = CandidatureListSerializer(candidatures, many=True)
         return Response(serializer.data)
     
@@ -238,7 +257,13 @@ class CandidatureViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        candidatures = Candidature.objects.filter(recruteur_assigne=request.user)
+        candidatures = Candidature.objects.filter(
+            recruteur_assigne=request.user
+        ).select_related(
+            'candidat'
+        ).prefetch_related(
+            'analyse_ia'
+        )
         serializer = CandidatureListSerializer(candidatures, many=True)
         return Response(serializer.data)
 
@@ -260,23 +285,33 @@ def dashboard_view(request):
 
 
 @api_view(['GET'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_stats_api(request):
     """
-    API pour récupérer les statistiques du tableau de bord
+    API pour récupérer les statistiques du tableau de bord avec mise en cache
     """
     try:
         if request.user.role not in ['recruteur', 'admin']:
             return Response({'error': 'Accès non autorisé'}, status=403)
         
-        # Statistiques générales
-        total_candidatures = Candidature.objects.count()
-        candidatures_en_attente = Candidature.objects.filter(status='en_attente').count()
-        candidatures_acceptees = Candidature.objects.filter(status='acceptee').count()
-        candidatures_refusees = Candidature.objects.filter(status='refusee').count()
-        candidatures_en_cours = Candidature.objects.filter(status='en_cours').count()
+        # Clé de cache pour les statistiques
+        cache_key = 'dashboard_stats'
+        cached_data = cache.get(cache_key)
         
-        # Statistiques par mois (6 derniers mois)
+        if cached_data:
+            return Response(cached_data)
+        
+        # Statistiques générales avec optimisation
+        stats = Candidature.objects.aggregate(
+            total=Count('id'),
+            en_attente=Count('id', filter=Q(status='en_attente')),
+            acceptees=Count('id', filter=Q(status='acceptee')),
+            refusees=Count('id', filter=Q(status='refusee')),
+            en_cours=Count('id', filter=Q(status='en_cours'))
+        )
+        
+        # Statistiques par mois (6 derniers mois) avec optimisation
         six_months_ago = timezone.now() - timedelta(days=180)
         candidatures_par_mois = list(
             Candidature.objects
@@ -287,7 +322,7 @@ def dashboard_stats_api(request):
             .order_by('month')
         )
         
-        # Top 5 des postes les plus demandés
+        # Top 5 des postes les plus demandés avec optimisation
         postes_populaires = list(
             Candidature.objects
             .values('poste')
@@ -297,10 +332,10 @@ def dashboard_stats_api(request):
         
         # Répartition des candidatures par statut
         repartition_statuts = [
-            {'status': 'En attente', 'count': candidatures_en_attente, 'color': '#ffc107'},
-            {'status': 'Acceptées', 'count': candidatures_acceptees, 'color': '#28a745'},
-            {'status': 'Refusées', 'count': candidatures_refusees, 'color': '#dc3545'},
-            {'status': 'En cours d\'examen', 'count': candidatures_en_cours, 'color': '#17a2b8'},
+            {'status': 'En attente', 'count': stats['en_attente'], 'color': '#ffc107'},
+            {'status': 'Acceptées', 'count': stats['acceptees'], 'color': '#28a745'},
+            {'status': 'Refusées', 'count': stats['refusees'], 'color': '#dc3545'},
+            {'status': 'En cours d\'examen', 'count': stats['en_cours'], 'color': '#17a2b8'},
         ]
         
         # Candidatures récentes (7 derniers jours)
@@ -309,37 +344,36 @@ def dashboard_stats_api(request):
             date_candidature__gte=sept_jours_ago
         ).count()
         
-        # Candidatures par recruteur
+        # Candidatures par recruteur avec optimisation
         candidatures_par_recruteur = list(
             Candidature.objects
             .filter(recruteur_assigne__isnull=False)
+            .select_related('recruteur_assigne')
             .values('recruteur_assigne__username', 'recruteur_assigne__first_name', 'recruteur_assigne__last_name')
             .annotate(count=Count('id'))
             .order_by('-count')
         )
         
-        # Temps de traitement moyen (candidatures avec date_reponse)
+        # Temps de traitement moyen avec optimisation
         candidatures_traitees = Candidature.objects.filter(
             date_reponse__isnull=False
-        ).exclude(status='en_attente')
+        ).exclude(status='en_attente').values_list('date_candidature', 'date_reponse')
         
-        temps_traitement_stats = []
-        if candidatures_traitees.exists():
-            for candidature in candidatures_traitees:
-                temps_traitement = (candidature.date_reponse - candidature.date_candidature).days
-                temps_traitement_stats.append(temps_traitement)
-            
+        temps_moyen = 0
+        if candidatures_traitees:
+            temps_traitement_stats = [
+                (reponse - candidature).days 
+                for candidature, reponse in candidatures_traitees
+            ]
             temps_moyen = sum(temps_traitement_stats) / len(temps_traitement_stats) if temps_traitement_stats else 0
-        else:
-            temps_moyen = 0
         
         response_data = {
             'statistiques_generales': {
-                'total_candidatures': total_candidatures,
-                'candidatures_en_attente': candidatures_en_attente,
-                'candidatures_acceptees': candidatures_acceptees,
-                'candidatures_refusees': candidatures_refusees,
-                'candidatures_en_cours': candidatures_en_cours,
+                'total_candidatures': stats['total'],
+                'candidatures_en_attente': stats['en_attente'],
+                'candidatures_acceptees': stats['acceptees'],
+                'candidatures_refusees': stats['refusees'],
+                'candidatures_en_cours': stats['en_cours'],
                 'temps_traitement_moyen': round(temps_moyen, 1),
             },
             'candidatures_par_mois': [
@@ -361,11 +395,15 @@ def dashboard_stats_api(request):
             }
         }
         
+        # Mettre en cache pour 5 minutes
+        cache.set(cache_key, response_data, 300)
         return Response(response_data)
         
     except Exception as e:
         return Response({'error': f'Erreur serveur: {str(e)}'}, status=500)
 
+
+# ============ GESTION DES CANDIDATURES ============
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -470,13 +508,20 @@ def create_candidature_view(request):
 @login_required
 def my_candidatures_view(request):
     """
-    User's candidatures view (candidates only)
+    User's candidatures view (candidates only) - optimized
     """
     if not request.user.is_candidate:
         messages.error(request, 'Accès non autorisé.')
         return redirect('users:home')
     
-    candidatures_queryset = Candidature.objects.filter(candidat=request.user).order_by('-date_candidature')
+    # Optimized queryset with select_related for foreign keys
+    candidatures_queryset = Candidature.objects.filter(
+        candidat=request.user
+    ).select_related(
+        'recruteur_assigne'
+    ).prefetch_related(
+        'analyse_ia'
+    ).order_by('-date_candidature')
     
     # Search and filter
     form = CandidatureSearchForm(request.GET)
@@ -528,7 +573,9 @@ def candidatures_list_view(request):
         messages.error(request, 'Accès non autorisé.')
         return redirect('users:home')
     
-    candidatures_queryset = Candidature.objects.all().order_by('-date_candidature')
+    candidatures_queryset = Candidature.objects.all().select_related(
+        'candidat', 'recruteur_assigne'
+    ).prefetch_related('analyse_ia').order_by('-date_candidature')
     
     # Search and filter
     form = CandidatureSearchForm(request.GET)
@@ -592,7 +639,10 @@ def candidature_detail_view(request, pk):
     """
     Candidature detail view
     """
-    candidature = get_object_or_404(Candidature, pk=pk)
+    candidature = get_object_or_404(
+        Candidature.objects.select_related('candidat', 'recruteur_assigne').prefetch_related('analyse_ia'),
+        pk=pk
+    )
     
     # Check permissions
     if request.user.is_candidate and candidature.candidat != request.user:

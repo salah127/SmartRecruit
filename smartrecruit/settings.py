@@ -31,12 +31,43 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@smartrecruit.
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0x1(%m43a-lwjaok4rn9+wg#y25!ot47!l!tzyf4etj&&c^f+4'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-0x1(%m43a-lwjaok4rn9+wg#y25!ot47!l!tzyf4etj&&c^f+4')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+
+# Security Settings
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# HTTPS Settings (activate in production)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Session Security
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+# CSRF Protection
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_USE_SESSIONS = True
+
+# File Upload Security
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_PERMISSIONS = 0o644
 
 
 # Application definition
@@ -63,6 +94,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom security and performance middleware
+    'smartrecruit.middleware.SecurityHeadersMiddleware',
+    'smartrecruit.middleware.RateLimitMiddleware',
+    'smartrecruit.middleware.SecurityAuditMiddleware',
+    'smartrecruit.middleware.PerformanceMiddleware',
 ]
 
 ROOT_URLCONF = 'smartrecruit.urls'
@@ -92,8 +128,35 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 30,  # Increase timeout for better performance
+            'check_same_thread': False,
+        }
     }
 }
+
+# Database query optimization
+if DEBUG:
+    # Show slow queries in development
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+        },
+    }
+
+# Enable persistent connections
+CONN_MAX_AGE = 60  # 60 seconds connection pooling
 
 
 # Password validation
@@ -206,11 +269,72 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# Cache Configuration
+# Use Redis if available, fallback to database cache
+try:
+    import redis
+    redis_client = redis.Redis(host='localhost', port=6379, db=1)
+    redis_client.ping()  # Test connection
+    
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': config('CACHE_LOCATION', default='redis://localhost:6379/1'),
+            'KEY_PREFIX': 'smartrecruit',
+            'TIMEOUT': 300,  # 5 minutes default timeout
+        }
+    }
+except (ImportError, redis.ConnectionError, redis.exceptions.ConnectionError):
+    # Fallback to database cache if Redis is not available
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+            'TIMEOUT': 300,
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000,
+            }
+        }
+    }
 
-# Security settings
-SESSION_COOKIE_SECURE = False 
-CSRF_COOKIE_SECURE = False 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# Cache-specific settings
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 600  # 10 minutes
+CACHE_MIDDLEWARE_KEY_PREFIX = 'smartrecruit'
+
+# Session configuration - use database if Redis not available
+try:
+    import redis
+    redis_client = redis.Redis(host='localhost', port=6379, db=1)
+    redis_client.ping()
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+except (ImportError, redis.ConnectionError, redis.exceptions.ConnectionError):
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# Performance optimizations
+DATABASE_CONNECTION_POOLING = True
+CONN_MAX_AGE = 60  # Database connection reuse
+
+# Static files optimization
+if not DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+# File upload optimizations
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Query optimization
+# Remove MySQL-specific settings for SQLite
+if 'sqlite' in DATABASES['default']['ENGINE']:
+    DATABASES['default']['OPTIONS']['timeout'] = 30
+elif 'mysql' in DATABASES['default']['ENGINE']:
+    DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES'"
+
+# Security and Performance Headers
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 

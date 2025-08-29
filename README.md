@@ -1,30 +1,17 @@
-# SmartRec**Système de comptes utilisateurs complet**
-- Modèle utilisateur personnalisé avec rôles définis
-- API REST complète pour la gestion des utilisateurs
-- Validation avancée des données et gestion d'erreurs
-- Interface d'administration intégrée
+# SmartRecruit - Plateforme Intelligente de Gestion des Ressources Humaines
 
-**Système de rôles hiérarchique**
-- **Admin** : Accès complet au système
-- **Recruteur** : Gestion des candidatures et évaluation
-- **Candidat** : Soumission et suivi des candidatures
+[![Django](https://img.shields.io/badge/Django-5.2.5-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
+[![DRF](https://img.shields.io/badge/DRF-Latest-orange.svg)](https://www.django-rest-framework.org/)
+[![AI](https://img.shields.io/badge/AI-Powered-purple.svg)](https://github.com)
 
-**Sécurité et permissions**
-- Permissions personnalisées basées sur les rôles
-- Contrôle d'accès granulaire
-- Filtrage des données selon les permissions
+## 📋 Description
 
-### II. Gestion des Candidatures
+SmartRecruit est une plateforme complète de gestion des ressources humaines développée avec Django et Django REST Framework. Le système intègre des fonctionnalités d'intelligence artificielle pour l'analyse automatique des CV, un système de notifications email avancé, et une architecture sécurisée pour la gestion complète du processus de recrutement.
 
-**Soumission de candidatures**estion Intelligente des Ressources Humaines
+## 🚀 Fonctionnalités Principales
 
-## Description
-
-SmartRecruit est une plateforme complète de gestion des ressources humaines développée avec Django et Django REST Framework. Le système intègre des fonctionnalités d'intelligence artificielle pour l'analyse automatique des CV et offre une gestion complète du processus de recrutement.
-
-## Fonctionnalités Principales
-
-### I. Gestion des Utilisateurs
+### 👥 I. Gestion des Utilisateurs
 
 **Système de comptes utilisateurs complet**
 - Modèle utilisateur personnalisé avec rôles définis
@@ -32,15 +19,17 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Validation avancée des données et gestion d'erreurs
 - Interface d'administration intégrée
 
-✅ **Système de rôles hiérarchique**
+**Système de rôles hiérarchique**
 - **👨‍💼 Admin** : Accès complet au système
 - **🎯 Recruteur** : Gestion des candidatures et évaluation
 - **👤 Candidat** : Soumission et suivi des candidatures
 
-✅ **Sécurité et permissions**
+**Sécurité et permissions**
 - Permissions personnalisées basées sur les rôles
-- Contrôle d'accès granulaire
+- Contrôle d'accès granulaire (RBAC)
 - Filtrage des données selon les permissions
+- Protection contre XSS, CSRF, et injection SQL
+- Middleware de sécurité personnalisé
 
 ### 📋 II. Gestion des Candidatures
 
@@ -64,7 +53,7 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Organisation hiérarchique par utilisateur
 - Suppression automatique lors de la suppression des candidatures
 
-### III. Intelligence Artificielle - Analyse de CV
+### 🤖 III. Intelligence Artificielle - Analyse de CV
 
 **Analyse automatique des CV**
 - Extraction intelligente du texte (PDF, DOC, DOCX)
@@ -91,12 +80,35 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 - Support Redis pour la gestion des tâches
 - Notifications automatiques des résultats
 
-### IV. Système de Notifications Email
+### 📧 IV. Système de Notifications Email
 
-**Notifications automatiques**
-- **Pour les candidats** : Mise à jour du statut des candidatures
-- **Pour les recruteurs** : Nouvelle candidature reçue
-- **Pour les recruteurs** : Assignation de candidature
+**Architecture de notifications complète**
+- Service de notifications centralisé
+- Gestion des préférences utilisateur
+- Templates d'emails personnalisables
+- Journalisation complète des envois
+- Système de fallback et retry automatique
+
+**Types de notifications automatiques**
+- **Pour les candidats** : 
+  - Confirmation de soumission de candidature
+  - Mise à jour du statut des candidatures
+  - Résultats d'analyse IA du CV
+- **Pour les recruteurs** : 
+  - Nouvelle candidature reçue
+  - Assignation de candidature
+  - Rappels de candidatures en attente
+
+**Modèles d'emails intégrés**
+- **candidate_status_update.html** : Notification de changement de statut
+- **new_candidature.html** : Alerte nouvelle candidature pour recruteurs
+- **candidature_assignment.html** : Notification d'assignation
+
+**Fonctionnalités avancées**
+- Configuration SMTP flexible (Gmail, Outlook, serveurs personnalisés)
+- Gestion des préférences de notifications par utilisateur
+- Mode développement avec emails de test
+- Logs détaillés pour debugging et monitoring
 
 **Gestion des préférences**
 - Configuration personnalisée des notifications
@@ -569,6 +581,58 @@ test: Ajouter tests pour les permissions
 
 ### Documentation
 - **API** : Consultez les endpoints documentés
+- **Code** : Commentaires détaillés dans le code source
+- **Tests** : Exemples d'utilisation dans les tests unitaires
+
+### Rapporter un Bug
+1. Vérifiez si le bug n'a pas déjà été rapporté
+2. Créez une issue avec des détails précis
+3. Incluez les logs d'erreur si applicable
+4. Décrivez les étapes pour reproduire le problème
+
+### Demandes de Fonctionnalités
+- Ouvrez une issue avec le tag "enhancement"
+- Décrivez clairement la fonctionnalité souhaitée
+- Expliquez le cas d'usage et les bénéfices
+
+## 🚀 Deployment
+
+### Production Checklist
+
+- [ ] Configurer PostgreSQL
+- [ ] Configurer Redis pour Celery
+- [ ] Variables d'environnement sécurisées
+- [ ] HTTPS et certificats SSL
+- [ ] Serveur web (Nginx + Gunicorn)
+- [ ] Monitoring et logs
+- [ ] Backups automatiques
+- [ ] Mises à jour de sécurité
+
+### Docker (Optionnel)
+
+```dockerfile
+# Dockerfile example
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["gunicorn", "smartrecruit.wsgi:application"]
+```
+
+## License
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## Auteurs
+
+- **Équipe SmartRecruit** - Développement initial
+- **Contributeurs** - Voir la liste des [contributeurs](contributors)
+
+---
+
+**SmartRecruit** - Révolutionnez votre processus de recrutement avec l'intelligence artificielle 🚀
 - **Code** : Commentaires dans le code source
 - **Issues** : Signalez les bugs sur GitHub
 

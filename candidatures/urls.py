@@ -8,7 +8,8 @@ from .views import (
 
 app_name = 'candidatures'
 from .views import CandidatureViewSet
-from . import ai_views
+# Temporarily disabled AI views due to NumPy compatibility issue
+# from . import ai_views
 
 router = DefaultRouter()
 router.register(r'candidatures', CandidatureViewSet)
@@ -26,7 +27,8 @@ urlpatterns = [
     path('list/', candidatures_list_view, name='list'),
     path('<int:pk>/', candidature_detail_view, name='detail'),
     path('<int:pk>/edit/', edit_candidature_view, name='edit'),
-    path('candidatures/<int:candidature_id>/analyze/', ai_views.analyze_cv, name='analyze_cv'),
-    path('candidatures/<int:candidature_id>/analysis/', ai_views.get_analysis_results, name='get_analysis_results'),
-    path('test/preprocess/', ai_views.preprocess_cv_test, name='preprocess_test'),
+    # Temporarily disabled AI views due to NumPy compatibility issue
+    # path('candidatures/<int:candidature_id>/analyze/', ai_views.analyze_cv, name='analyze_cv'),
+    # path('candidatures/<int:candidature_id>/analysis/', ai_views.get_analysis_results, name='get_analysis_results'),
+    # path('test/preprocess/', ai_views.preprocess_cv_test, name='preprocess_test'),
 ]
