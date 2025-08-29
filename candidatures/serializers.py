@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Candidature
+from .models import Candidature, AnalyseCV
 
 User = get_user_model()
 
@@ -133,3 +133,17 @@ class CandidatureCandidatSerializer(serializers.ModelSerializer):
             'id', 'status', 'date_candidature', 'date_modification',
             'commentaire_recruteur', 'date_reponse'
         ]
+
+
+class AnalyseCVSerializer(serializers.ModelSerializer):
+    candidat_email = serializers.CharField(source='candidature.candidat.email', read_only=True)
+    poste = serializers.CharField(source='candidature.poste', read_only=True)
+    
+    class Meta:
+        model = AnalyseCV
+        fields = [
+            'id', 'candidat_email', 'poste', 'donnees_extractes',
+            'score_competences', 'score_experience', 'score_global',
+            'recommendations', 'date_analyse'
+        ]
+        read_only_fields = ['date_analyse']
