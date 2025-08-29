@@ -142,36 +142,48 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 
 ## Architecture Technique
 
-### Structure du Projet
+## 📁 Structure du Projet (Après Nettoyage)
 
 ```
 smartrecruit/
-├── smartrecruit/              # Configuration Django principale
+├── .env                       # Variables d'environnement
+├── .git/                      # Contrôle de version
+├── .gitignore                # Fichiers ignorés par Git
+├── db.sqlite3                # Base de données SQLite
+├── manage.py                 # Script Django principal
+├── README.md                 # Documentation principale
+├── requirements.txt          # Dépendances Python
+├── smartrecruit/             # Configuration Django principale
+│   ├── __init__.py
 │   ├── settings.py           # Configuration générale
-│   ├── urls.py               # URLs principales
+│   ├── urls.py               # URLs principales  
 │   ├── celery.py             # Configuration Celery
-│   └── wsgi.py               # WSGI application
-├── users/                     # Application gestion utilisateurs
+│   ├── wsgi.py               # WSGI application
+│   └── tests.py              # Tests de configuration (601 lignes)
+├── users/                    # Application gestion utilisateurs
 │   ├── models.py             # Modèle User personnalisé
 │   ├── serializers.py        # Sérialiseurs DRF
 │   ├── views.py              # Vues API et templates
 │   ├── permissions.py        # Permissions personnalisées
 │   ├── admin.py              # Interface admin
-│   └── urls.py               # URLs de l'app
-├── candidatures/              # Application gestion candidatures
+│   ├── urls.py               # URLs de l'app
+│   └── tests.py              # Tests complets (606 lignes)
+├── candidatures/             # Application gestion candidatures
 │   ├── models.py             # Modèles Candidature et AnalyseCV
 │   ├── serializers.py        # Sérialiseurs pour l'API
 │   ├── views.py              # Vues principales et dashboard
 │   ├── ai_views.py           # Vues spécifiques à l'IA
 │   ├── forms.py              # Formulaires Django
 │   ├── permissions.py        # Permissions candidatures
-│   └── admin.py              # Configuration admin
-├── notifications/             # Système de notifications
+│   ├── admin.py              # Configuration admin
+│   └── tests.py              # Tests complets (1,089 lignes)
+├── notifications/            # Système de notifications
 │   ├── models.py             # Modèles preferences et logs
 │   ├── services.py           # Services d'envoi d'email
 │   ├── signals.py            # Signaux Django automatiques
-│   └── views.py              # API notifications
-├── ai/                        # Module Intelligence Artificielle
+│   ├── views.py              # API notifications
+│   └── tests.py              # Tests complets (407 lignes)
+├── ai/                       # Module Intelligence Artificielle
 │   ├── models/               # Modèles IA
 │   │   ├── resume_analyzer.py    # Analyseur principal CV
 │   │   └── model_loader.py       # Chargeur de modèles
@@ -180,17 +192,20 @@ smartrecruit/
 │   │   └── feature_extractor.py  # Extracteur de caractéristiques
 │   ├── utils/                # Utilitaires IA
 │   │   └── file_processor.py     # Traitement fichiers
-│   └── tasks.py              # Tâches Celery asynchrones
-├── templates/                 # Templates HTML
+│   ├── tasks.py              # Tâches Celery asynchrones
+│   └── tests.py              # Tests IA (357 lignes - désactivés)
+├── templates/                # Templates HTML
 │   ├── base.html             # Template de base
 │   ├── candidatures/         # Templates candidatures
 │   └── users/                # Templates utilisateurs
-├── media/                     # Fichiers uploadés
+├── media/                    # Fichiers uploadés
 │   └── candidatures/         # Organisation par utilisateur
-├── ai_models/                 # Modèles IA sauvegardés
-├── data/                      # Données d'entraînement
-└── requirements.txt           # Dépendances Python
+└── data/                     # Données d'entraînement et datasets
+    ├── kaggle_resume_dataset/    # Dataset Kaggle
+    └── processed/               # Données traitées
 ```
+
+**Note :** Le projet a été nettoyé en supprimant tous les fichiers temporaires, utilitaires de test obsolètes, documentation excessive et caches Python pour une structure plus propre et maintenable.
 
 ### Technologies Utilisées
 
@@ -475,18 +490,40 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 ## 🧪 Tests
 
+Le projet dispose d'une **suite de tests complète** avec plus de **3,200 lignes de tests** :
+
+### Structure des Tests
+- **users/tests.py** (606 lignes) - 7 classes de test
+- **candidatures/tests.py** (1,089 lignes) - 7 classes de test  
+- **notifications/tests.py** (407 lignes) - 5 classes de test
+- **smartrecruit/tests.py** (601 lignes) - 10 classes de test
+- **ai/tests.py** (357 lignes) - 6 classes de test (temporairement désactivées)
+
 ### Lancer les tests
 ```bash
+# Tous les tests
 python manage.py test
+
+# Tests par application
+python manage.py test users
+python manage.py test candidatures
+python manage.py test notifications
+
+# Tests spécifiques
+python manage.py test users.tests.UserModelTestCase
 ```
 
-### Tests de l'IA
+### Types de Tests Couverts
+- ✅ **Tests unitaires** : Modèles, vues, sérialiseurs, permissions
+- ✅ **Tests d'intégration** : Workflows complets, API endpoints
+- ✅ **Tests de sécurité** : Contrôle d'accès, validation des données
+- ✅ **Tests de fichiers** : Upload, validation, traitement
+
+### Tests de l'IA (Note)
 ```bash
-# Test de prétraitement
-python manage.py shell
->>> from ai.processing.data_preprocessor import CVPreprocessor
->>> preprocessor = CVPreprocessor()
->>> # Tester avec un fichier CV
+# Les tests AI sont temporairement désactivés à cause de 
+# problèmes de compatibilité NumPy 2.x vs 1.x
+# Ils seront réactivés après résolution des dépendances
 ```
 
 ## Documentation Technique
