@@ -1,14 +1,32 @@
-# SmartRecruit - Système de Gestion Intelligente des Ressources Humaines
+# SmartRec**Système de comptes utilisateurs complet**
+- Modèle utilisateur personnalisé avec rôles définis
+- API REST complète pour la gestion des utilisateurs
+- Validation avancée des données et gestion d'erreurs
+- Interface d'administration intégrée
 
-## 🎯 Description
+**Système de rôles hiérarchique**
+- **Admin** : Accès complet au système
+- **Recruteur** : Gestion des candidatures et évaluation
+- **Candidat** : Soumission et suivi des candidatures
+
+**Sécurité et permissions**
+- Permissions personnalisées basées sur les rôles
+- Contrôle d'accès granulaire
+- Filtrage des données selon les permissions
+
+### II. Gestion des Candidatures
+
+**Soumission de candidatures**estion Intelligente des Ressources Humaines
+
+## Description
 
 SmartRecruit est une plateforme complète de gestion des ressources humaines développée avec Django et Django REST Framework. Le système intègre des fonctionnalités d'intelligence artificielle pour l'analyse automatique des CV et offre une gestion complète du processus de recrutement.
 
-## ✨ Fonctionnalités Principales
+## Fonctionnalités Principales
 
-### 🧑‍💼 I. Gestion des Utilisateurs
+### I. Gestion des Utilisateurs
 
-✅ **Système de comptes utilisateurs complet**
+**Système de comptes utilisateurs complet**
 - Modèle utilisateur personnalisé avec rôles définis
 - API REST complète pour la gestion des utilisateurs
 - Validation avancée des données et gestion d'erreurs
@@ -26,91 +44,91 @@ SmartRecruit est une plateforme complète de gestion des ressources humaines dé
 
 ### 📋 II. Gestion des Candidatures
 
-✅ **Soumission de candidatures**
+**Soumission de candidatures**
 - Upload sécurisé de CV (PDF, DOC, DOCX)
 - Upload optionnel de lettre de motivation
 - Message d'accompagnement personnalisé
 - Contrainte d'unicité : un candidat par poste
 
-✅ **Gestion par les recruteurs**
+**Gestion par les recruteurs**
 - Visualisation de toutes les candidatures
 - Modification des statuts (En attente, Acceptée, Refusée, En cours)
 - Assignation de recruteurs spécifiques
 - Téléchargement sécurisé des documents
 - Système de commentaires et suivi détaillé
 
-✅ **Sécurité des fichiers**
+**Sécurité des fichiers**
 - Validation stricte des extensions de fichiers
 - Limitation de taille (5MB maximum)
 - Noms de fichiers sécurisés avec UUID
 - Organisation hiérarchique par utilisateur
 - Suppression automatique lors de la suppression des candidatures
 
-### 🤖 III. Intelligence Artificielle - Analyse de CV
+### III. Intelligence Artificielle - Analyse de CV
 
-✅ **Analyse automatique des CV**
+**Analyse automatique des CV**
 - Extraction intelligente du texte (PDF, DOC, DOCX)
 - Détection automatique de la langue (FR/EN)
 - Analyse des compétences techniques
 - Évaluation de l'expérience professionnelle
 - Score de compatibilité avec le poste
 
-✅ **Modèles IA utilisés**
+**Modèles IA utilisés**
 - **BERT** pour la classification et l'analyse sémantique
 - **Sentence Transformers** pour l'embedding et la similarité
 - **spaCy** pour le traitement du langage naturel (NLP)
 - **scikit-learn** pour les analyses statistiques
 
-✅ **Système de scoring avancé**
+**Système de scoring avancé**
 - Score global de pertinence (0-100)
 - Score par compétences techniques
 - Score d'expérience professionnelle
 - Score de formation/éducation
 - Recommandations personnalisées
 
-✅ **Traitement asynchrone**
+**Traitement asynchrone**
 - Analyses IA en arrière-plan avec **Celery**
 - Support Redis pour la gestion des tâches
 - Notifications automatiques des résultats
 
-### 📧 IV. Système de Notifications Email
+### IV. Système de Notifications Email
 
-✅ **Notifications automatiques**
+**Notifications automatiques**
 - **Pour les candidats** : Mise à jour du statut des candidatures
 - **Pour les recruteurs** : Nouvelle candidature reçue
 - **Pour les recruteurs** : Assignation de candidature
 
-✅ **Gestion des préférences**
+**Gestion des préférences**
 - Configuration personnalisée des notifications
 - Opt-in/Opt-out pour chaque type de notification
 - Interface de gestion des préférences
 
-✅ **Journalisation complète**
+**Journalisation complète**
 - Log de tous les emails envoyés
 - Suivi des succès/échecs d'envoi
 - Traçabilité complète des communications
 
-### 📊 V. Tableau de Bord et Analytics
+### V. Tableau de Bord et Analytics
 
-✅ **Statistiques en temps réel**
+**Statistiques en temps réel**
 - Nombre total de candidatures
 - Répartition par statut
 - Candidatures par recruteur
 - Évolution mensuelle des candidatures
 
-✅ **Graphiques interactifs**
+**Graphiques interactifs**
 - Évolution temporelle des candidatures
 - Postes les plus demandés
 - Répartition des statuts (graphique en secteurs)
 - Temps de traitement moyen
 
-✅ **Analyses avancées**
+**Analyses avancées**
 - Top 5 des postes populaires
 - Candidatures par recruteur
 - Activité récente (7 derniers jours)
 - Métriques de performance
 
-## 🏗️ Architecture Technique
+## Architecture Technique
 
 ### Structure du Projet
 
@@ -162,7 +180,7 @@ smartrecruit/
 └── requirements.txt           # Dépendances Python
 ```
 
-### 🛠️ Technologies Utilisées
+### Technologies Utilisées
 
 #### Backend & Framework
 - **Django 5.2.5** - Framework web principal
@@ -196,9 +214,9 @@ smartrecruit/
 - **seaborn** - Visualisation statistique
 - **plotly** - Graphiques interactifs
 
-## 🔗 API Endpoints
+## API Endpoints
 
-### 👥 Gestion des Utilisateurs
+### Gestion des Utilisateurs
 ```
 GET    /api/users/                    # Liste des utilisateurs (admin/recruteur)
 POST   /api/users/                    # Créer un utilisateur (admin uniquement)
@@ -211,7 +229,7 @@ POST   /api/users/{id}/change_role/   # Changer le rôle (admin)
 POST   /api/users/{id}/toggle_active/ # Activer/désactiver (admin)
 ```
 
-### 📋 Gestion des Candidatures
+### Gestion des Candidatures
 ```
 GET    /api/candidatures/                        # Liste des candidatures (filtrée par rôle)
 POST   /api/candidatures/                        # Créer une candidature (candidat uniquement)
@@ -227,33 +245,33 @@ GET    /api/candidatures/by_status/              # Filtrer par statut
 GET    /api/candidatures/assigned_to_me/         # Candidatures assignées (recruteur)
 ```
 
-### 🤖 Intelligence Artificielle
+### Intelligence Artificielle
 ```
 POST   /api/candidatures/{id}/analyze/           # Lancer analyse IA du CV
 GET    /api/candidatures/{id}/analysis/          # Récupérer résultats d'analyse
 POST   /api/test/preprocess/                     # Test de prétraitement CV
 ```
 
-### 📊 Tableau de Bord
+### Tableau de Bord
 ```
 GET    /api/dashboard/stats/                     # Statistiques générales
 GET    /api/dashboard/charts/                    # Données pour graphiques
 ```
 
-### 📧 Notifications
+### Notifications
 ```
 GET    /api/notifications/preferences/           # Préférences de notification
 PUT    /api/notifications/preferences/           # Modifier préférences
 GET    /api/notifications/logs/                  # Historique des notifications
 ```
 
-### 🔐 Authentification
+### Authentification
 ```
 GET    /api-auth/login/                          # Connexion
 GET    /api-auth/logout/                         # Déconnexion
 ```
 
-## 🛡️ Sécurité et Permissions
+## Sécurité et Permissions
 
 ### Système de Permissions
 - **IsAdminUser** : Accès administrateur uniquement
@@ -267,26 +285,26 @@ GET    /api-auth/logout/                         # Déconnexion
 
 ### Contrôle d'Accès par Rôle
 
-#### 👨‍💼 Administrateurs
+#### Administrateurs
 - Accès complet à tous les utilisateurs et candidatures
 - Gestion des rôles et permissions
 - Accès au tableau de bord complet
 - Suppression de comptes et candidatures
 
-#### 🎯 Recruteurs
+#### Recruteurs
 - Visualisation de tous les candidats et candidatures
 - Gestion des statuts des candidatures
 - Assignation de candidatures
 - Accès aux analyses IA et statistiques
 - Téléchargement des documents
 
-#### 👤 Candidats
+#### Candidats
 - Création et modification de leurs candidatures
 - Visualisation de leurs candidatures uniquement
 - Téléchargement de leurs propres documents
 - Accès aux résultats d'analyse de leurs CV
 
-## 📦 Installation et Configuration
+## Installation et Configuration
 
 ### Prérequis
 - Python 3.12+
@@ -373,7 +391,7 @@ DEFAULT_FROM_EMAIL=noreply@smartrecruit.com
 # EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 ```
 
-## 🚀 Utilisation
+## Utilisation
 
 ### 1. Accès à l'application
 - **Interface Web** : http://localhost:8000
@@ -393,7 +411,7 @@ Après l'installation, créez des comptes pour tester :
 4. **Recruteur** : Met à jour le statut (accepté/refusé/en cours)
 5. **Candidat** : Reçoit une notification de mise à jour
 
-## 📊 Fonctionnalités IA Détaillées
+## Fonctionnalités IA Détaillées
 
 ### Analyse des CV
 - **Extraction de texte** : Support PDF, DOC, DOCX
@@ -415,7 +433,7 @@ Après l'installation, créez des comptes pour tester :
 - Score de formation/éducation
 - Recommandations personnalisées
 
-## 🔧 Configuration Avancée
+## Configuration Avancée
 
 ### Variables d'Environnement
 ```env
@@ -459,7 +477,7 @@ python manage.py shell
 >>> # Tester avec un fichier CV
 ```
 
-## 📚 Documentation Technique
+## Documentation Technique
 
 ### Architecture des Modèles
 
@@ -495,7 +513,7 @@ class AnalyseCV(models.Model):
     # ... autres champs
 ```
 
-## 🤝 Contribution
+## Contribution
 
 ### Standards de Code
 - Suivre PEP 8 pour Python
@@ -511,25 +529,25 @@ docs: Mettre à jour la documentation API
 test: Ajouter tests pour les permissions
 ```
 
-## 📝 Changelog
+## Changelog
 
 ### Version 1.0.0 (Actuelle)
-- ✅ Système de gestion des utilisateurs avec rôles
-- ✅ Gestion complète des candidatures
-- ✅ Intelligence artificielle pour l'analyse des CV
-- ✅ Système de notifications email
-- ✅ Tableau de bord avec analytics
-- ✅ API REST complète
-- ✅ Interface d'administration
+- Système de gestion des utilisateurs avec rôles
+- Gestion complète des candidatures
+- Intelligence artificielle pour l'analyse des CV
+- Système de notifications email
+- Tableau de bord avec analytics
+- API REST complète
+- Interface d'administration
 
 ### Prochaines Fonctionnalités
-- 🔄 Système de chat en temps réel
-- 🔄 Planification d'entretiens
-- 🔄 Génération de rapports PDF
-- 🔄 Intégration avec des plateformes externes
-- 🔄 Application mobile (React Native)
+- Système de chat en temps réel
+- Planification d'entretiens
+- Génération de rapports PDF
+- Intégration avec des plateformes externes
+- Application mobile (React Native)
 
-## ❓ Questions Techniques Résolues
+## Questions Techniques Résolues
 
 ### **Comment mettre en place la gestion des rôles dans Django ?**
 
@@ -547,7 +565,7 @@ test: Ajouter tests pour les permissions
 4. **API endpoints** : Exposition des fonctionnalités IA via REST API
 5. **Gestion des erreurs** : Handling robuste des exceptions IA
 
-## 📞 Support et Contact
+## Support et Contact
 
 ### Documentation
 - **API** : Consultez les endpoints documentés
@@ -562,4 +580,4 @@ test: Ajouter tests pour les permissions
 
 ---
 
-**SmartRecruit** - Révolutionnez votre processus de recrutement avec l'intelligence artificielle 🚀
+**SmartRecruit** - Révolutionnez votre processus de recrutement avec l'intelligence artificielle
