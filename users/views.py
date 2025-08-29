@@ -8,7 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Prefetch
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from .serializers import UserSerializer, UserListSerializer, UserUpdateSerializer
 from .permissions import IsAdminUser, IsOwnerOrAdmin, IsAdminOrRecruiter
 from .forms import CustomUserCreationForm, UserProfileForm, CustomAuthenticationForm
@@ -54,20 +57,28 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Filter queryset based on user role
+        Filter queryset based on user role with optimization
         """
         user = self.request.user
         
+        # Base queryset optimization
+        queryset = User.objects.select_related()
+        
         if user.is_admin:
             # Admins can see all users
-            return User.objects.all()
+            return queryset.all()
         elif user.is_recruiter:
             # Recruiters can see candidates and other recruiters
-            return User.objects.filter(role__in=['candidat', 'recruteur'])
+            return queryset.filter(role__in=['candidat', 'recruteur'])
         else:
             # Candidates can only see their own profile
-            return User.objects.filter(id=user.id)
+            return queryset.filter(id=user.id)
     
+    @method_decorator(cache_page(300))  # Cache for 5 minutes
+    def list(self, request, *args, **kwargs):
+        """
+        List users with caching
+        """
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """
@@ -219,18 +230,31 @@ def profile_view(request):
     else:
         form = UserProfileForm(instance=request.user)
     
-    # Get candidature statistics for candidates
+    # Get candidature statistics for candidates with optimization
     candidatures_stats = None
     if request.user.is_candidate:
         from candidatures.models import Candidature
-        candidatures = Candidature.objects.filter(candidat=request.user)
-        candidatures_stats = {
-            'total': candidatures.count(),
-            'en_attente': candidatures.filter(status='en_attente').count(),
-            'en_cours': candidatures.filter(status='en_cours').count(),
-            'acceptees': candidatures.filter(status='acceptee').count(),
-            'refusees': candidatures.filter(status='refusee').count(),
-        }
+        
+        # Use cache for candidature stats
+        cache_key = f'user_candidatures_stats_{request.user.id}'
+        candidatures_stats = cache.get(cache_key)
+        
+        if candidatures_stats is None:
+            # Optimized aggregation query instead of multiple filter queries
+            from django.db.models import Case, When, IntegerField
+            
+            candidatures_stats = Candidature.objects.filter(
+                candidat=request.user
+            ).aggregate(
+                total=Count('id'),
+                en_attente=Count('id', filter=Q(status='en_attente')),
+                en_cours=Count('id', filter=Q(status='en_cours')),
+                acceptees=Count('id', filter=Q(status='acceptee')),
+                refusees=Count('id', filter=Q(status='refusee')),
+            )
+            
+            # Cache for 2 minutes
+            cache.set(cache_key, candidatures_stats, 120)
     
     return render(request, 'users/profile.html', {
         'form': form,
