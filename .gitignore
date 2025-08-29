@@ -1,27 +1,5 @@
 
-# Environment variables
 .env
 
-# AI data directory
+# Dossier contenant la data pour l'ia
 data/
-
-# Python cache files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Django specific
-*.log
-db.sqlite3
-media/
-staticfiles/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
