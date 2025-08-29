@@ -44,3 +44,11 @@ WARNING 2025-08-29 10:30:51,791 basehttp 12764 9720 "GET /meta.json HTTP/1.1" 40
 INFO 2025-08-29 10:30:54,656 basehttp 12764 9720 "GET /candidatures/my-candidatures/ HTTP/1.1" 200 18223
 WARNING 2025-08-29 10:30:54,759 log 12764 9720 Not Found: /meta.json
 WARNING 2025-08-29 10:30:54,759 basehttp 12764 9720 "GET /meta.json HTTP/1.1" 404 5132
+INFO 2025-08-29 10:47:52,682 autoreload 24188 14680 Watching for file changes with StatReloader
+INFO 2025-08-29 10:48:21,705 basehttp 24188 16936 "GET / HTTP/1.1" 200 8725
+INFO 2025-08-29 10:48:24,573 basehttp 24188 16936 "GET /candidatures/create/ HTTP/1.1" 200 9560
+INFO 2025-08-29 10:48:26,233 basehttp 24188 16936 "GET /candidatures/my-candidatures/ HTTP/1.1" 200 18223
+INFO 2025-08-29 10:48:27,710 basehttp 24188 16936 "GET /candidatures/my-candidatures/ HTTP/1.1" 200 18223
+INFO 2025-08-29 10:48:29,179 basehttp 24188 16936 "GET /candidatures/create/ HTTP/1.1" 200 9560
+INFO 2025-08-29 10:48:29,973 basehttp 24188 16936 "GET / HTTP/1.1" 200 8725
+INFO 2025-08-29 10:48:31,501 basehttp 24188 16936 "GET /profile/ HTTP/1.1" 200 11116

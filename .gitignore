@@ -3,3 +3,8 @@
 
 # Dossier contenant la data pour l'ia
 data/
+
+users/__pycache__/
+ai/__pycache__/
+candidatures/__pycache__/
+smartrecruit/__pycache__/
