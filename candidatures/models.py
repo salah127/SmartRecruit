@@ -7,6 +7,11 @@ from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
+def cv_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('cvs', filename)
+    
 
 def validate_file_size(file):
     """Validate file size (max 5MB)"""
@@ -152,3 +157,70 @@ class Candidature(models.Model):
                 os.remove(self.lettre_motivation.path)
         
         super().delete(*args, **kwargs)
+
+
+class AnalyseCV(models.Model):
+    """Modèle pour stocker les résultats détaillés de l'analyse IA"""
+    
+    candidature = models.OneToOneField(
+        Candidature, 
+        on_delete=models.CASCADE,
+        related_name='analyse_ia'
+    )
+    
+    donnees_extractes = models.JSONField(
+        default=dict,
+        verbose_name='Données extraites',
+        help_text='Données brutes extraites par l\'IA'
+    )
+    
+    score_competences = models.FloatField(
+        verbose_name='Score compétences',
+        help_text='Score des compétences (0-100)'
+    )
+    
+    score_experience = models.FloatField(
+        verbose_name='Score expérience',
+        help_text='Score de l\'expérience (0-100)'
+    )
+    
+    score_formation = models.FloatField(
+        verbose_name='Score formation',
+        help_text='Score de la formation (0-100)'
+    )
+    
+    score_global = models.FloatField(
+        verbose_name='Score global',
+        help_text='Score global de pertinence (0-100)'
+    )
+    
+    recommendations = models.TextField(
+        verbose_name='Recommandations',
+        help_text='Recommandations et commentaires de l\'IA'
+    )
+    
+    date_analyse = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Date d\'analyse'
+    )
+    
+    modele_utilise = models.CharField(
+        max_length=100,
+        default='BERT',
+        verbose_name='Modèle IA utilisé',
+        help_text='Nom du modèle IA utilisé pour l\'analyse'
+    )
+    
+    version_modele = models.CharField(
+        max_length=50,
+        default='1.0',
+        verbose_name='Version du modèle'
+    )
+    
+    class Meta:
+        verbose_name = 'Analyse IA'
+        verbose_name_plural = 'Analyses IA'
+        ordering = ['-date_analyse']
+    
+    def __str__(self):
+        return f"Analyse pour {self.candidature.candidat.email} - {self.score_global}/100"
